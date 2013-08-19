@@ -7,7 +7,7 @@ Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Create your own custom travel map. Link locations on the map to blog posts and share your planned travel schedule.
+Create your own custom travel map. Link locations on the map to blog posts and share your travel plans.
 
 == Description ==
 
@@ -29,13 +29,13 @@ The location content itself is shown in a carousel underneath the map. When you 
 1. Upload the `nomad-world-map` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Create your route on the map under 'Nomad Map'
-1. Add the map to a page with this shortcode: [nwm_map]
+1. Add the map to a page with this shortcode: `[nwm_map]`
 
 == Frequently Asked Questions ==
 
 = How do I add the map to a page? =
 
-Add this shortcode [nwm_map] to the page where you want to display the map.
+Add this shortcode `[nwm_map]` to the page where you want to display the map.
 
 = Can I specify the dimensions of the map? =
 
