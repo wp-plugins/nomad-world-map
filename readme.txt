@@ -52,7 +52,7 @@ Yes, just add the width and height as an attribute to the shortcode. `[nwm_map h
 
 = 1.0.1 =
 * Fixed an interface bug that in some cases resulted in a "setMap is not a function" javascript error and broke the search function
-* Modified the datepicker, removed the dates limits and added a check for keyboard input
+* Modified the datepicker, removed the date limits and added a check for keyboard input
 
 = 1.0 =
 * Initial release
