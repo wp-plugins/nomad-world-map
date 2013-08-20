@@ -136,11 +136,11 @@ function zoomLocation( latlng, zoom ) {
 /* Remove all markers from the map */
 function deleteOverlays() {
 	if ( markersArray ) {
-	  for( i in markersArray ) {
-		markersArray[i].setMap( null );
-	  }
-	  markersArray.length = 0;
-	}
+        for ( i = 0; i < markersArray.length; i++ ) {
+            markersArray[i].setMap( null );
+        }
+    markersArray.length = 0;
+    }
 }
 
 /* Geocode the user input */ 
@@ -1160,25 +1160,27 @@ if($("#nwm-from-date").length) {
 	loadCalendar(); 
 }
 
-/* Attatch the jquery UI datepickers */
+/* Bind the jquery UI datepickers */
 function loadCalendar() {	
-	$("#nwm-from-date").removeClass('hasDatepicker').datepicker({ minDate: 1, 
-													 maxDate: "+12M",
+	$("#nwm-from-date").removeClass('hasDatepicker').datepicker({
 													 altFormat: '@',
 													 dateFormat: "yy-mm-dd",
-													 onSelect : function( dateText, inst ) {
-																	var epoch = $.datepicker.formatDate('MM dd, yy', $(this).datepicker( 'getDate' ));
-																	$(this).closest('form').find('[name=from_date]').val( epoch );
+													 onClose: function( dateText, inst ) {
+																	var formatedFromDate = $.datepicker.formatDate('MM dd, yy', $(this).datepicker( 'getDate' ));
+																	if( formatedFromDate ) {
+																		$(this).closest('form').find('[name=from_date]').val( formatedFromDate );
+																	}
 																}
 												 	});
 	
-	$("#nwm-till-date").removeClass('hasDatepicker').datepicker({ minDate: 1, 
-													 maxDate: "+18M",
+	$("#nwm-till-date").removeClass('hasDatepicker').datepicker({ 
 													 altFormat: '@',
 													 dateFormat: "yy-mm-dd",
-													 onSelect : function( dateText, inst ) {
-																	var epoch = $.datepicker.formatDate('MM dd, yy', $(this).datepicker( 'getDate' ));
-																	$(this).closest('form').find('[name=till_date]').val( epoch );
+													 onClose: function( dateText, inst ) {
+																	var formatedTillDate = $.datepicker.formatDate('MM dd, yy', $(this).datepicker( 'getDate' ));
+																	if( formatedTillDate ) {
+																		$(this).closest('form').find('[name=till_date]').val( formatedTillDate );
+																	}
 																}
 												 	});	
 }

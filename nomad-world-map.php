@@ -2,8 +2,8 @@
 /*
 Plugin Name: Nomad World Map
 Plugin URI: http://nomadworldmap.com/?utm_source=wpadmin&utm_medium=plugin&utm_campaign=nwm
-Description: Create your own custom travel map. Link locations on the map to blog posts and share your planned travel schedule.
-Version: 1.0
+Description: Create your own custom travel map. Link locations on the map to blog posts and share your travel plans.
+Version: 1.0.1
 Author: Tijmen Smit
 Author URI: http://nomadworldmap.com/?utm_source=wpadmin&utm_medium=plugin&utm_campaign=nwm
 License: GPLv2
@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! defined( 'NWN_VERSION_NUM' ) )	
-	define( 'NWN_VERSION_NUM', '1.0' );
+	define( 'NWN_VERSION_NUM', '1.0.1' );
 	
 if ( ! defined( 'NWM_URL' ) )
 	define( 'NWM_URL', plugin_dir_url( __FILE__ ) );
@@ -47,8 +47,8 @@ if ( is_admin() ) {
 	
 	add_action( 'admin_enqueue_scripts', 'nwm_admin_scripts' );
 	
-	if ( get_option( 'nwm_version' ) === false ) { 
-		add_option( 'nwm_version', NWN_VERSION_NUM );
+	if ( get_option( 'nwm_version' ) !== NWN_VERSION_NUM ) { 
+		update_option( 'nwm_version', NWN_VERSION_NUM );
 	} 
 } else {
 	require 'includes/nwm-frontend-functions.php';

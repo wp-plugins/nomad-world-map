@@ -3,11 +3,11 @@ Contributors: tijmensmit
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 3.6
-Stable tag: 1.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Create your own custom travel map. Link locations on the map to blog posts and share your travel plans.
+Create your own custom travel map. Link locations on the map to blog posts and share your planned travel schedule.
 
 == Description ==
 
@@ -29,13 +29,13 @@ The location content itself is shown in a carousel underneath the map. When you 
 1. Upload the `nomad-world-map` folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Create your route on the map under 'Nomad Map'
-1. Add the map to a page with this shortcode: `[nwm_map]`
+1. Add the map to a page with this shortcode: [nwm_map]
 
 == Frequently Asked Questions ==
 
 = How do I add the map to a page? =
 
-Add this shortcode `[nwm_map]` to the page where you want to display the map.
+Add this shortcode [nwm_map] to the page where you want to display the map.
 
 = Can I specify the dimensions of the map? =
 
@@ -49,6 +49,10 @@ Yes, just add the width and height as an attribute to the shortcode. `[nwm_map h
 
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed an interface bug that in some cases resulted in a "setMap is not a function" javascript error and broke the search function
+* Modified the datepicker, removed the dates limits and added a check for keyboard input
 
 = 1.0 =
 * Initial release
