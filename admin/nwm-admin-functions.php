@@ -10,7 +10,6 @@ add_action( 'wp_ajax_update_order', 'nwm_update_order' );
 add_action( 'wp_ajax_load_content', 'nwm_load_content' );
 add_action( 'wp_ajax_find_post_title', 'nwm_find_post_title' );
 add_action( 'save_post', 'nwm_check_used_id' );
-add_action( 'delete_post', 'nwm_sync_db' );
 add_filter( 'wp_loaded', 'nwm_load_textdomain' );
 
 function nwm_create_admin_menu() {
@@ -23,7 +22,7 @@ function nwm_create_admin_menu() {
 function nwm_init() {
 	register_setting( 'nwm_settings', 'nwm_settings', 'nwm_settings_check' );
 	
-  	if ( current_user_can( 'delete_posts' ) ) {
+	if ( current_user_can( 'delete_posts' ) ) {
 		 add_action( 'delete_post', 'nwm_sync_db' );
 	}
 }
@@ -587,7 +586,7 @@ function nwm_map_editor() {
 								   
 	?>
     <div id="nwm-wrap" class="wrap">
-        <h1>Nomad World Map</h1>
+        <h2>Nomad World Map</h2>
 		
         <div class="nwn-new-destination-wrap">
            <ul id="nwm-menu">
@@ -753,7 +752,7 @@ function nwm_settings_page() {
 		<div id="message" style="width:90%;" class="message updated"><p><strong><?php _e( 'Settings updated', 'nwm' ) ?></strong></p></div>
         <?php
 	}
-	
+
 	?>
     <div class="wrap">
         <div id="nwm-wrap">
@@ -776,6 +775,10 @@ function nwm_settings_page() {
                                 <p>
                                     <label for="nwm-zoom-to"><?php _e( 'On pageload zoom to:', 'nwm' ); ?></label> 
                                     <?php echo nwm_zoom_to( $options ); ?>
+                                </p>
+                                <p>
+                                    <label for="nwm-zoom-level"><?php _e( 'Zoom level:', 'nwm' ); ?></label> 
+                                    <?php echo nwm_zoom_level( $options ); ?>
                                 </p>
                                 <div class="nwm-marker-lines">
                                     <label for="nwm-past-color"><?php _e( 'Past route color:', 'nwm' ); ?></label> 
@@ -878,6 +881,13 @@ function nwm_settings_check() {
 	} else {
 		$output['zoom_to'] = 'last';
 	}
+	
+	/* Check if we have a valid zoom level, it has to be between 1 or 12. If not set it to the default of 3 */
+	if ( $_POST['nwm-zoom-level'] >= 1 || $_POST['nwm-zoom-level'] <= 12 ) {
+		$output['zoom_level'] = $_POST['nwm-zoom-level'];
+	} else {
+		$output['zoom_level'] = 3;	
+	}	
 
 	$output['flightpath'] = isset( $_POST['nwm-flightpath'] ) ? 1 : 0;	
 	$output['round_thumbs'] = isset( $_POST['nwm-round-thumbs'] ) ? 1 : 0;	
@@ -910,6 +920,37 @@ function nwm_zoom_to( $options ) {
 	
 	$dropdown .= "</select>";
 	
+	return $dropdown;
+	
+}
+
+/* Create the dropdown to select the zoom level */
+function nwm_zoom_level( $options ) {
+					   
+	$dropdown = '<select id="nwm-zoom-level" name="nwm-zoom-level">';
+	
+	for ( $i = 1; $i < 13; $i++ ) {
+        $selected = ( $options['zoom_level'] == $i ) ? 'selected="selected"' : '';
+		
+		switch ( $i ) {
+			case '1':
+				$zoom_desc = '- World view';
+				break;
+			case '3':
+				$zoom_desc = '- Default';
+				break;
+			case '12':
+				$zoom_desc = '- Roadmap view';
+				break;	
+			default:
+				$zoom_desc = '';		
+		}
+
+		$dropdown .= "<option value='$i' $selected>$i $zoom_desc</option>";	
+    }
+		
+	$dropdown .= "</select>";
+		
 	return $dropdown;
 	
 }
@@ -1013,42 +1054,22 @@ function nwm_sync_db( $post_id ) {
 	
 		/* Check if the post_id exists in the options field for the plugin */
 		if ( in_array( $post_id, $nwm_post_ids ) ) {	
-			$result = $wpdb->get_var( $wpdb->prepare( "SELECT nwm_id, post_id FROM $wpdb->nwm_routes WHERE post_id = %d", $post_id, OBJECT ) );
-
-			if ( $wpdb->num_rows ) {
-				if ( $wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->nwm_routes WHERE post_id = %d", $post_id ) ) ) {
-					
-					/* Remove the post_id from the nwm_post_ids option list */
-					foreach ( $nwm_post_ids as $k => $nwm_post_id ) {
-						if ( $nwm_post_id == $post_id ) {
-							unset( $nwm_post_ids[$k] );
-							break;
-						}
-					}
-					
-					$nwm_updated_ids = implode( ",", $nwm_post_ids );
-					update_option( 'nwm_post_ids', $nwm_updated_ids );
-					
-					/* Get the current route order and check if the id from the deleted stop exists, if so remove it and update the current route order */
-					$nwm_route_order = get_option( 'nwm_route_order' );	
-					$nwm_route_order = explode( ',', $nwm_route_order );
-					
-					foreach ( $nwm_route_order as $k => $nwm_id ) {
-						if ( $nwm_id == $result[0]->nwm_id ) {
-							unset( $nwm_route_order[$k] );
-							break;
-						}
-					}
-					
-					$nwm_updated_order = implode( ",", $nwm_route_order );
-					update_option( 'nwm_route_order', $nwm_updated_order );
-			
-					delete_transient( 'nwm_locations' );
+				
+			/* Remove the post_id from the nwm_post_ids option list */
+			foreach ( $nwm_post_ids as $k => $nwm_post_id ) {
+				if ( $nwm_post_id == $post_id ) {
+					unset( $nwm_post_ids[$k] );
+					break;
 				}
-			}	// end num_rows
-		}	// end in_array
+			}
+			
+			$nwm_updated_ids = implode( ",", $nwm_post_ids );
+			update_option( 'nwm_post_ids', $nwm_updated_ids );
+	
+			delete_transient( 'nwm_locations' );
+		}
 	}
-
+	
 } 
 
 function nwm_load_textdomain() {

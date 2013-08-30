@@ -58,6 +58,7 @@ More Info:		http://nomadworldmap.com
 }
 .marker-thumb img {
 	border-radius:4px;
+	box-shadow:none;
 }
 		
 #nwm-destination-list {
@@ -172,8 +173,11 @@ More Info:		http://nomadworldmap.com
 	background-position:-23px 0;
 	background-color:#ebebeb;
 }
-.nwm-circle {
-	border-radius:33px;
+
+#nwm-destination-list img,
+span.nwm-circle {
+	border-radius:33px !important;
+	box-shadow:none;
 }
 .nwm-content {
 	float:left; 

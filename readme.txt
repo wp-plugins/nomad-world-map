@@ -3,17 +3,18 @@ Contributors: tijmensmit
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 3.6
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Create your own custom travel map. Link locations on the map to blog posts and share your planned travel schedule.
+Create your own custom travel map. Link locations on the map to blog posts and share your travel plans.
 
 == Description ==
 
 For each location that is added to the map you can set the type of content you want to show. Either the excerpt of a blog post, a short custom description or only the travel dates.
 
 The location content itself is shown in a carousel underneath the map. When you slide through the carousel the map will automatically zoom to the location that is linked to the visible content.
+
 
 = Features include: =
 
@@ -50,8 +51,16 @@ Yes, just add the width and height as an attribute to the shortcode. `[nwm_map h
 
 == Changelog ==
 
+= 1.0.2 =
+* Added the option to set a custom zoom level
+* Improved the zooming on page load by setting the latlng value of the active location as the center of the map
+* Fixed a css bug where in some themes the thumbnails were shown as a square instead of a circle
+* Fixed the incorrect display of older dates on the map
+* Fixed a situation where an incorrect title could show up for future locations
+* Modified the handling of blog post that are deleted and were linked to locations on the map
+
 = 1.0.1 =
-* Fixed an interface bug that in some cases resulted in a "setMap is not a function" javascript error and broke the search function
+* Fixed a interface bug that in some cases resulted in a "setMap is not a function" javascript error when searching for a new location on Google Maps
 * Modified the datepicker, removed the dates limits and added a check for keyboard input
 
 = 1.0 =

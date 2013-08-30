@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Nomad World Map
-Plugin URI: http://nomadworldmap.com/?utm_source=wpadmin&utm_medium=plugin&utm_campaign=nwm
+Plugin URI: http://nomadworldmap.com/
 Description: Create your own custom travel map. Link locations on the map to blog posts and share your travel plans.
-Version: 1.0.1
+Version: 1.0.2
 Author: Tijmen Smit
-Author URI: http://nomadworldmap.com/?utm_source=wpadmin&utm_medium=plugin&utm_campaign=nwm
+Author URI: http://nomadworldmap.com/
 License: GPLv2
 
 Copyright 2013 Tijmen Smit, tijmen at nomadworldmap.com
@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! defined( 'NWN_VERSION_NUM' ) )	
-	define( 'NWN_VERSION_NUM', '1.0.1' );
+	define( 'NWN_VERSION_NUM', '1.0.2' );
 	
 if ( ! defined( 'NWM_URL' ) )
 	define( 'NWM_URL', plugin_dir_url( __FILE__ ) );

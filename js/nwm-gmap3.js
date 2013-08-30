@@ -1,10 +1,11 @@
 jQuery(document).ready(function($) {
 	
 if($('#nomad-world-map').length) {
-	var zoomControlPosition, zoomControlStyle,
+	var zoomControlPosition, zoomControlStyle, zoomTo,
 		flightPath = [],
 		futureFlightPath = [],
 		loadedImageList = [],
+		zoomLevel = parseInt(nwmSettings.zoomLevel),
 		placeholder = nwmSettings.path + 'img/spacer.gif',
 		streetViewVisible = (nwmSettings.streetView == 1) ? true : false,
 		newMarker = new google.maps.MarkerImage(nwmSettings.path + '/img/marker.png',
@@ -24,16 +25,16 @@ if($('#nomad-world-map').length) {
 	} else {
 		zoomControlStyle = google.maps.ZoomControlStyle.LARGE
 	}
-		  
+		
 	$('#nomad-world-map').gmap3({
 		map:{
 			options:{
-			  center: [33.867489, 151.206985],
+			  center: [zoomTo],
 			  scrollwheel: false,
 			  mapTypeControl: false,
 			  navigationControl: false,
 			  panControl: false,
-			  zoom: 2,
+			  zoom: zoomLevel,
 			  streetViewControl: streetViewVisible,
 			  zoomControlOptions: {
 					style: zoomControlStyle,
@@ -280,7 +281,11 @@ function checkHeaderFormat( markerUrl, markerTitle, destination, futureLocation 
 	} else if ( futureLocation ) {
 		title = destination;	
 	} else {
-		title = markerTitle;
+		if ( markerTitle ) {
+			title = markerTitle;
+		} else {
+			title = destination; 
+		}		
 	}	
 	
 	return title;

@@ -11,6 +11,7 @@ function nwm_default_settings() {
 			'flightpath' => 1,
 			'round_thumbs' => 1,
 			'zoom_to' => 'first',
+			'zoom_level' => '3',
 			'past_color' => '#ad1700',
 			'future_color' => '#001d70',
 			'streetview' => '0',

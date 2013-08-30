@@ -7,12 +7,12 @@ add_shortcode( 'nwm_map', 'nwm_show_full_map' );
 function nwm_show_full_map( $atts, $content = null ) {
 	
 	global $wpdb;
-
+	
 	extract( shortcode_atts( array (
 	  "width" => '',
 	  "height" => '',
 	), $atts ) ); 
-	
+		
 	/* Check if there is an existing transient we can use */
 	if ( false === ( $frontend_data = get_transient( 'nwm_locations' ) ) ) {	
 		$settings = get_option( 'nwm_settings' );
@@ -20,14 +20,15 @@ function nwm_show_full_map( $atts, $content = null ) {
 		$date_format = 'M j, Y';
 		$i = 0;	
 		$json_data = '';
-
+		$zoom_to = '';
+		
 		$nwm_location_data = $wpdb->get_results("
 												SELECT nwm_id, post_id, lat, lng, location, arrival, departure
 												FROM $wpdb->nwm_routes
 												ORDER BY field(nwm_id, $nwm_route_order)
 												"
 											    );	
-								
+																				
 		foreach ( $nwm_location_data as $k => $nwm_location ) {	
 			$future = '';
 		
@@ -44,8 +45,13 @@ function nwm_show_full_map( $atts, $content = null ) {
 				if ( $settings['zoom_to'] == 'schedule_start' ) {
 					if ( empty( $future_index ) ) {
 						$future_index = $i - 1;
+						$zoom_to = $nwm_location->lat.','.$nwm_location->lng;	
 					}
 				}
+			}
+			
+			if ( ( $settings['zoom_to'] == 'first' ) && ( $i == 0 ) ) {
+				$zoom_to = $nwm_location->lat.','.$nwm_location->lng;	
 			}
 		
 			if ( !$nwm_location->post_id ) {
@@ -59,7 +65,7 @@ function nwm_show_full_map( $atts, $content = null ) {
 					$custom_url = esc_url( $nwm_custom_data[0]->url );
 					$custom_title = esc_html( $nwm_custom_data[0]->title );
 				}
-				
+
 				$post_data = array( 'nwm_id' => (int) $nwm_location->nwm_id,
 								    'post_id' => 0,
 								    'content' => $custom_content,
@@ -71,7 +77,8 @@ function nwm_show_full_map( $atts, $content = null ) {
 								    'arrival' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->arrival ) ),
 								    'departure' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->departure ) ),
 								    'future' => esc_html( $future )
-								   );
+								   );			   
+								   
 			} else {
 				$publish_date = get_the_time( $date_format, $nwm_location->post_id );
 				$post_data = nwm_collect_post_data( $nwm_location, $publish_date, $future, $date_format );
@@ -83,6 +90,11 @@ function nwm_show_full_map( $atts, $content = null ) {
 						  );	
 						
 			$json_data .= json_encode( $data ).',' ;
+			
+			if ( $settings['zoom_to'] == 'last' ) {
+				$zoom_to = $nwm_location->lat.','.$nwm_location->lng;	
+			}
+			
 			$i++;
 		} // end foreach
 		
@@ -95,10 +107,12 @@ function nwm_show_full_map( $atts, $content = null ) {
 		}
 	
 		$settings['future_index'] = $future_index; 
+		$settings['zoom_to'] = $zoom_to; 
 		$frontend_data = array( 'location_data' => rtrim( $json_data, "," ), 
 					  		    'settings' => $settings
 					 		   );
 		
+		/* Calculate the duration of the transient lifetime  */
 		if ( !empty( $first_future_date ) ) {
 			$current_epoch = time();
 			$dt = new DateTime("@$current_epoch");
@@ -113,10 +127,10 @@ function nwm_show_full_map( $atts, $content = null ) {
 						 
 		set_transient( 'nwm_locations', $frontend_data, $transient_lifetime ); 
 	}
-	
+
 	/* Load the required front-end scripts and set the js data */
 	nwm_frontend_scripts( $frontend_data );
-	
+		
 	?>
     <!-- Nomad World Map - http://nomadworldmap.com -->
 	<div class="nwm-wrap" <?php if ( ( int ) $width ) { echo 'style="width:'.$width.'px"'; } ?>>
@@ -131,7 +145,7 @@ function nwm_show_full_map( $atts, $content = null ) {
 }
 
 /* Collect the excerpt, thumbnail and permalink that belongs to the $post_id */
-function nwm_collect_post_data( $nwm_location, $publish_date, $future, $date_format ) {
+function nwm_collect_post_data( $nwm_location, $publish_date, $future, $date_format ) {	
 	
 	$thumb = wp_get_attachment_image_src( get_post_thumbnail_id( $nwm_location->post_id ), 'thumbnail' );
 	$excerpt = nwm_get_post_excerpt( $nwm_location->post_id );
@@ -157,7 +171,8 @@ function nwm_collect_post_data( $nwm_location, $publish_date, $future, $date_for
 /* Change the date format from example 2013-06-28 00:00:00 into M j, Y */
 function nwm_convert_date_format( $date_format, $route_date ) {
 	if ( $route_date != '0000-00-00 00:00:00' ) {
-		return  mysql2date( $date_format, $route_date, $translate = true );		
+		$date = DateTime::createFromFormat( 'Y-m-d H:i:s', $route_date );
+		return $date->format( $date_format );
 	}
 }
 
@@ -194,6 +209,8 @@ function nwm_frontend_scripts( $frontend_data ) {
 	$params = array(
 		'lines' => $frontend_data['settings']['flightpath'],
 		'thumbCircles' => $frontend_data['settings']['round_thumbs'],
+		'zoomLevel' => $frontend_data['settings']['zoom_level'],
+		'zoomTo' => $frontend_data['settings']['zoom_to'],
 		'pastLineColor' => $frontend_data['settings']['past_color'],
 		'futureLineColor' => $frontend_data['settings']['future_color'],
 		'path' => NWM_URL,
