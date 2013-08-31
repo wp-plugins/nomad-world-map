@@ -12,7 +12,7 @@ function nwm_show_full_map( $atts, $content = null ) {
 	  "width" => '',
 	  "height" => '',
 	), $atts ) ); 
-		
+			
 	/* Check if there is an existing transient we can use */
 	if ( false === ( $frontend_data = get_transient( 'nwm_locations' ) ) ) {	
 		$settings = get_option( 'nwm_settings' );

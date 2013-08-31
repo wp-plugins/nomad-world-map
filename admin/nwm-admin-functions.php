@@ -20,11 +20,36 @@ function nwm_create_admin_menu() {
 }
 
 function nwm_init() {
-	register_setting( 'nwm_settings', 'nwm_settings', 'nwm_settings_check' );
 	
 	if ( current_user_can( 'delete_posts' ) ) {
 		 add_action( 'delete_post', 'nwm_sync_db' );
 	}
+	
+	nwm_check_upgrade();
+	register_setting( 'nwm_settings', 'nwm_settings', 'nwm_settings_check' );
+	
+}
+
+/* Based on the version number run updates */
+function nwm_check_upgrade() {
+	
+	$current_version = get_option( 'nwm_version' );
+	
+	if ( version_compare( $current_version, NWN_VERSION_NUM, '===' ) )	
+		return;
+	
+	if ( version_compare( $current_version, '1.0.3', '<' ) ) {
+		$settings = get_option( 'nwm_settings' );	
+		
+		if ( is_array( $settings ) && empty( $settings['zoom_level'] ) ) {
+			$settings['zoom_level'] = 3;
+			update_option( 'nwm_settings', $settings );
+		}
+	}
+	
+	update_option( 'nwm_version', NWN_VERSION_NUM );
+	delete_transient( 'nwm_locations' );
+			
 }
 
 /* Save a new location */
@@ -582,8 +607,9 @@ function nwm_map_editor() {
 										   'lng' => $route_stop->lng,
 										   'data' => $post_data
 								  	     );	
+										 
 	}
-								   
+																			   
 	?>
     <div id="nwm-wrap" class="wrap">
         <h2>Nomad World Map</h2>

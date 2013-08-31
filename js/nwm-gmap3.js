@@ -25,7 +25,7 @@ if($('#nomad-world-map').length) {
 	} else {
 		zoomControlStyle = google.maps.ZoomControlStyle.LARGE
 	}
-		
+			
 	$('#nomad-world-map').gmap3({
 		map:{
 			options:{

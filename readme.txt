@@ -3,7 +3,7 @@ Contributors: tijmensmit
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 3.6
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,9 @@ Yes, just add the width and height as an attribute to the shortcode. `[nwm_map h
 
 
 == Changelog ==
+
+= 1.0.3 =
+* Fixed a situation where an invalid zoom level value would break the entire map
 
 = 1.0.2 =
 * Added the option to set a custom zoom level
