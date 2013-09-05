@@ -99,7 +99,7 @@ function nwm_show_full_map( $atts, $content = null ) {
 		} // end foreach
 		
 		if ( empty( $future_index ) ) {
-			if( $settings['zoom_to'] == 'first' ) {
+			if ( $settings['zoom_to'] == 'first' ) {
 				$future_index = 0;
 			} else {
 				$future_index = $i - 1;
@@ -131,17 +131,29 @@ function nwm_show_full_map( $atts, $content = null ) {
 	/* Load the required front-end scripts and set the js data */
 	nwm_frontend_scripts( $frontend_data );
 		
-	?>
-    <!-- Nomad World Map - http://nomadworldmap.com -->
-	<div class="nwm-wrap" <?php if ( ( int ) $width ) { echo 'style="width:'.$width.'px"'; } ?>>
-		<div id="nomad-world-map" <?php if ( ( int ) $height ) { echo 'style="height:'.$height.'px"'; } ?>></div>
-		<div id="nwm-destination-list">
-			<div class="nwm-back nwm-control"></div>
-			<ul></ul>
-			<div class="nwm-forward nwm-control"></div>
-		</div>   
-	</div>	
-	<?php
+	if ( ( int ) $width ) { 
+		$width = 'style="width:' . $width . 'px"';
+	} else {
+		$width = '';	
+	}
+	
+	if ( ( int ) $height ) { 
+		$height = 'style="height:'.$height.'px"';
+	} else {
+		$height = '';	
+	}
+    
+	$output .= '<!-- Nomad World Map - http://nomadworldmap.com -->';
+	$output .= '<div class="nwm-wrap" ' . $width . '>'; 
+	$output .= '<div id="nomad-world-map" ' . $height . '></div>';
+	$output .= '<div id="nwm-destination-list">';	
+	$output .= '<div class="nwm-back nwm-control"></div>';	
+	$output .= '<ul></ul>';	
+	$output .= '<div class="nwm-forward nwm-control"></div>';	
+	$output .= '</div>';	
+	$output .= '</div>';	
+
+	return $output;	
 }
 
 /* Collect the excerpt, thumbnail and permalink that belongs to the $post_id */
@@ -171,7 +183,7 @@ function nwm_collect_post_data( $nwm_location, $publish_date, $future, $date_for
 /* Change the date format from example 2013-06-28 00:00:00 into M j, Y */
 function nwm_convert_date_format( $date_format, $route_date ) {
 	if ( $route_date != '0000-00-00 00:00:00' ) {
-		$date = DateTime::createFromFormat( 'Y-m-d H:i:s', $route_date );
+		$date = new DateTime( $route_date );
 		return $date->format( $date_format );
 	}
 }

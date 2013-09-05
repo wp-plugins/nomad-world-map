@@ -34,6 +34,7 @@ More Info:		http://nomadworldmap.com
 #nomad-world-map div {
 	max-width:none; 
 	box-shadow:none;
+	background:none;
 }
 
 .marker-content {

@@ -990,10 +990,9 @@ function limit_words( $string, $word_limit ) {
 /* Validate the date format */
 function nwm_check_date( $date ) {
 	
-	$date = DateTime::createFromFormat( 'Y-m-d', $date );
-	$date_errors = DateTime::getLastErrors();
+	$date = date( 'Y-m-d', $date );
 	
-	if ( $date_errors['warning_count'] + $date_errors['error_count'] > 0 ) {
+	if ( !$date ) {
 		return false;
 	} else {
 		return true;
@@ -1003,12 +1002,10 @@ function nwm_check_date( $date ) {
 
 /* Change the date format into month, day, year */
 function nwm_date_format( $route_date ) {
-	
+				
 	if ( $route_date != '0000-00-00 00:00:00' ) {
-		$date = date_create_from_format( 'Y-m-d H:i:s', $route_date );
-		$formated_date = date_format( $date, 'F d, Y' );	
-		
-		return $formated_date;
+		$date = new DateTime( $route_date );
+		return $date->format( 'F d, Y' );
 	}
 		
 }

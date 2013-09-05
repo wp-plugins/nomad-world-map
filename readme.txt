@@ -3,7 +3,7 @@ Contributors: tijmensmit
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 3.6
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,10 @@ Yes, just add the width and height as an attribute to the shortcode. `[nwm_map h
 
 
 == Changelog ==
+
+= 1.0.4 =
+* Fixed the handling of travel dates for php versions lower then 5.3
+* Changed the shortcode output so that the map can also be placed between content, and doesn't always ends up on top of the content
 
 = 1.0.3 =
 * Fixed a situation where an invalid zoom level value would break the entire map
