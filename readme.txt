@@ -52,7 +52,7 @@ Yes, just add the width and height as an attribute to the shortcode. `[nwm_map h
 == Changelog ==
 
 = 1.0.4 =
-* Fixed the handling of travel dates for php versions lower then 5.3
+* Fixed the handling of custom travel dates for php versions lower then 5.3
 * Changed the shortcode output so that the map can also be placed between content, and doesn't always ends up on top of the content
 
 = 1.0.3 =
