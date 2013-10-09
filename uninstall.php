@@ -13,6 +13,7 @@ function nwm_uninstall() {
 	delete_option( 'nwm_version' );
 	delete_option( 'nwm_settings' );
 	delete_option( 'nwm_post_ids' );
+	delete_option( 'nwm_map_ids' );
 	delete_option( 'nwm_route_order' );
 	
 }

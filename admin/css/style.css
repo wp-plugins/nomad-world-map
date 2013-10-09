@@ -1,11 +1,9 @@
-#nwm-wrap  {
-	max-width:1100px;
-}
 #nwm-menu {
 	float:left; 
 	width:100%;
 	padding-left:7px;
 	border-bottom:1px solid #ccc;
+	margin-bottom:20px;
 }
 #nwm-menu li {
 	float:left; 
@@ -45,10 +43,15 @@
 
 .nwn-new-destination-wrap, 
 .nwn-current-destinations-wrap {
+	position:relative;
 	overflow:hidden;
 }
 .nwn-current-destinations-wrap {
 	margin-top:20px;
+}
+
+#nwm-destination-list td {
+	height:34px;
 }
 
 .nwm-tab {
@@ -70,9 +73,9 @@
 #nwm-destination-wrap .nwm-error {
 	border:1px solid #c01313;
 }
-.nwm-marker-option {
+/*.nwm-marker-option {
 	margin-bottom:10px;
-}
+}*/
 .gmap-wrap {
 	position: relative;
 	margin-left: 364px; 
@@ -80,8 +83,8 @@
 	
 #gmap-nwm {
 	float:left; 
-	height:387px; 
-	width:99%; 
+	height:526px; 
+	width:100%; 
 	border-radius:3px; 
 }
 #gmap-nwm.no-float {
@@ -97,11 +100,35 @@
 	width:160px;
 }
 #nwm-trips label, 
-#nwm-wrap label {
+#nwm-wrap label,
+#nwm-add-map-box label,
+#nwm-edit-name-box label  {
 	display:block; 
 	font-weight:bold; 
 	margin:0 0 5px 2px;
 }
+
+#nwm-add-map-box label,
+#nwm-edit-name-box label {font-weight:normal;}
+#nwm-map-selector {
+	position:absolute; 
+	right:0; 
+	top:0;
+	padding-right:15px;
+}
+#nwm-map-selector img {   
+	position: absolute;
+    right: 0;
+    top: 3px;
+	margin:0;
+}
+#nwm-map-list {
+	margin:0 10px 0 5px;
+}
+
+#nwm-map-selector label {
+	display:inline;
+} 
 
 #nwm-custom-text .nwm-textarea-wrap label {
 	float:left; 
@@ -225,6 +252,40 @@
     margin-left: 10px;
     margin-top: 5px;
 }
+
+/* Thumbnails */
+#nwm-thumb-wrap { 	
+	float:left; 
+	width:100%; 
+	margin-bottom:12px;
+}
+
+.nwm-thumb, 
+.nwm-circle {
+	float:left;
+	border-radius:33px;	
+	width:64px; 
+	height:64px;
+	margin:10px 15px 10px 0; 
+}
+
+.nwm-thumb {
+	background:#EBEBEB url(../../img/graphic.png) -23px 0 no-repeat;
+}
+
+#nwm-thumb-wrap .button-primary {
+	float:left; 
+	margin-right:10px;
+}
+#nwm-thumb-wrap div {float:left; width:100%; clear:both;}
+#nwm-thumb-wrap strong {display:block;}
+
+#nwm-destination-list .nwm-thumb, 
+#nwm-destination-list .nwm-circle {
+	width:34px;
+	height:34px;
+	margin:0;
+	}
 
 /* Datepickers */
 .nwm-dates {

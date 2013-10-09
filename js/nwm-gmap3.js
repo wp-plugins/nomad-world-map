@@ -1,31 +1,52 @@
 jQuery(document).ready(function($) {
 	
 if($('#nomad-world-map').length) {
-	var zoomControlPosition, zoomControlStyle, zoomTo,
+	var zoomControlPosition, zoomControlStyle, zoomTo, mapType,
 		flightPath = [],
 		futureFlightPath = [],
 		loadedImageList = [],
-		zoomLevel = parseInt(nwmSettings.zoomLevel),
+		zoomLevel = parseInt( nwmSettings.zoomLevel ),
 		placeholder = nwmSettings.path + 'img/spacer.gif',
-		streetViewVisible = (nwmSettings.streetView == 1) ? true : false,
+		streetViewVisible = ( nwmSettings.streetView == 1 ) ? true : false,
 		newMarker = new google.maps.MarkerImage(nwmSettings.path + '/img/marker.png',
 			new google.maps.Size(30,30),
 			new google.maps.Point(0,0),
 			new google.maps.Point(8,8)
 		);	
 	
+	/* Set correct postion of the controls */		
 	if ( nwmSettings.controlPosition == 'right' ) {
 		zoomControlPosition = google.maps.ControlPosition.RIGHT_TOP
 	} else {
 		zoomControlPosition = google.maps.ControlPosition.LEFT_TOP
 	}
 	
+	/* Set correct control style */	
 	if ( nwmSettings.controlStyle == 'small' ) {
 		zoomControlStyle = google.maps.ZoomControlStyle.SMALL
 	} else {
 		zoomControlStyle = google.maps.ZoomControlStyle.LARGE
 	}
-			
+	
+	/* Set the selected map type */
+	switch( nwmSettings.mapType) {
+		case 'roadmap':
+		  mapType = google.maps.MapTypeId.ROADMAP;
+		  break;
+		case 'satellite':
+		  mapType = google.maps.MapTypeId.SATELLITE;
+		  break;
+		case 'hybrid':
+		  mapType = google.maps.MapTypeId.HYBRID;
+		  break;
+		case 'terrain':
+		  mapType = google.maps.MapTypeId.TERRAIN;
+		  break;		  
+		default:
+		  mapType = google.maps.MapTypeId.ROADMAP;
+	}
+	
+	/* Initialize the map */			
 	$('#nomad-world-map').gmap3({
 		map:{
 			options:{
@@ -35,6 +56,7 @@ if($('#nomad-world-map').length) {
 			  navigationControl: false,
 			  panControl: false,
 			  zoom: zoomLevel,
+			  mapTypeId: mapType,
 			  streetViewControl: streetViewVisible,
 			  zoomControlOptions: {
 					style: zoomControlStyle,
@@ -60,10 +82,12 @@ if($('#nomad-world-map').length) {
 	});
 }
 
+/* Create the markers */
 function generateMarkers( $this, map, bounds ){
 	var futureLocation,
 		futurePathCount = 0,
-		i = 0;
+		i = 0,
+		curvedLines = ( nwmSettings.curvedLines == 1 ) ? true : false;
 
 	for ( var key in nwmDestinations ) {
 		futureLocation = false;
@@ -93,7 +117,10 @@ function generateMarkers( $this, map, bounds ){
 		i++;
 	}
 	
+	/* Check if we need to draw lines between the markers */
 	if ( nwmSettings.lines == 1 ) {
+		
+		/* Check if we need to draw a line for past locations */
 		if ( flightPath.length ) {
 			$this.gmap3({ 
 				polyline:{
@@ -101,12 +128,14 @@ function generateMarkers( $this, map, bounds ){
 					  strokeColor: nwmSettings.pastLineColor,
 					  strokeOpacity: 1.0,
 					  strokeWeight: 2,
+					  geodesic: curvedLines,
 					  path: flightPath
 					}
 				}
 			});
 		}
 		
+		/* Check if we need to draw a line for future locations */
 		if ( futureFlightPath.length ) {
 			$this.gmap3({ 
 				polyline:{
@@ -114,6 +143,7 @@ function generateMarkers( $this, map, bounds ){
 					  strokeColor: nwmSettings.futureLineColor,
 					  strokeOpacity: 1.0,
 					  strokeWeight: 2,
+					  geodesic: curvedLines,
 					  path: futureFlightPath
 					}
 				}
@@ -261,7 +291,7 @@ function imageLoader() {
 		}).done( function( ) {
 			/*
 			Remove the preloaders, set the correct src attribute and push the value to 
-			the array where we keep track of the already loaded thumbs 
+			the array were we keep track of the already loaded thumbs 
 			 */
 			$("#nwm-preload-img-" + id ).remove();
 			img.attr('src', imgSrc);
@@ -329,6 +359,7 @@ $(".nwm-back").on( 'click', function() {
 	}	
 });	
 
+/* Enable keyboard navigation for the slider */
 $(document).keydown( function( eventObject ) {
      if ( eventObject.which == 37 ) {
 		$(".nwm-back").trigger( 'click' );
