@@ -1,7 +1,155 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+add_shortcode( 'nwm_list', 'nwm_show_list' );
 add_shortcode( 'nwm_map', 'nwm_show_full_map' );
+
+/* Show a list of visited locations */
+function nwm_show_list( $atts, $content = null ) {
+
+	global $wpdb;
+	
+	extract( shortcode_atts( array (
+	  "id" => '',
+	  "dates" => ''
+	), $atts ) ); 
+		
+	/* Check if we have a valid id, otherwise just set it to 1 (default map) */
+	if ( !absint ( $id ) ) {
+		$id = 1;	
+	}	
+	
+	delete_transient( 'nwm_route_list_'.$id );
+	
+	/* Check if there is an existing transient we can use */
+	if ( false === ( $route_list = get_transient( 'nwm_route_list_'.$id ) ) ) {	
+		$settings = get_option( 'nwm_settings' );
+		$nwm_route_order = get_option( 'nwm_route_order' );
+		$date_format = get_option( 'date_format' );
+		$route_order = esc_sql( implode( ',', wp_parse_id_list( $nwm_route_order[$id] ) ) );
+
+		$nwm_location_data = $wpdb->get_results("
+												SELECT nwm_id, post_id, location, arrival, departure
+												FROM $wpdb->nwm_routes
+												WHERE nwm_id IN ($route_order)
+												ORDER BY field(nwm_id, $route_order)
+												"
+											    );	
+
+		foreach ( $nwm_location_data as $k => $nwm_location ) {	
+			$future = '';
+		
+			/* Check if we have a future date */		
+			if ( strtotime( $nwm_location->arrival ) > time() ) {
+				$future = true;
+			}
+			
+			$post_data = array( 'location' => $nwm_location->location,
+								'departure' => nwm_convert_date_format( $date_format, $nwm_location->departure ),
+								'future' => $future
+							   );
+			
+			/* If we have no post_id get the data from the custom table*/
+			if ( !$nwm_location->post_id ) {
+				$nwm_custom_data = $wpdb->get_results( 'SELECT url, title FROM' . $wpdb->nwm_custom . 'WHERE nwm_id =' . absint( $nwm_location->nwm_id ) . '' );
+				$post_data_part = array( 'url' => '',
+								   		 'arrival' => nwm_convert_date_format( $date_format, $nwm_location->arrival ),
+								  		);	
+			} else {
+				$arrival_date = nwm_convert_date_format( $date_format, $nwm_location->arrival );
+				
+				/* If no custom arrival date is set, use the publish date */
+				if ( empty( $arrival_date ) ) {
+					$arrival_date = get_the_time( $date_format, $nwm_location->post_id );
+				}
+				
+				$post_data_part = array( 'url' => get_permalink( $nwm_location->post_id ),
+								  		 'arrival' => $arrival_date,
+								 	    );
+			}
+
+			$list_data[] = array_merge( $post_data, $post_data_part );	
+		} // end foreach
+		
+		/* Make sure we have some data before proceeding */		
+		if ( !empty( $list_data ) ) {
+			$i = 1;
+			
+			$route_list = '<table id="nwm-route-list" width="100%" border="0" cellspacing="0">';
+			$route_list .= '<thead>';
+			$route_list .= '<th scope="col"></th>';
+			$route_list .= '<th scope="col">' . __( 'Location', 'nwm' ) . '</th>';
+			
+			/* If the date option attribute set in the shortcode, show the headers */
+			if ( !empty( $dates ) ) {
+				switch ( $dates ) {
+					case 'all':
+						$route_list .= '<th scope="col">' . __( 'Arrival', 'nwm' ) . '</th>';
+						$route_list .= '<th scope="col">' . __( 'Departure', 'nwm' ) . '</th>';
+						break;
+					case 'arrival':
+						$route_list .= '<th scope="col">' . __( 'Arrival', 'nwm' ) . '</th>';
+						break;	
+					case 'departure':
+						$route_list .= '<th scope="col">' . __( 'Departure', 'nwm' ) . '</th>';
+						break;
+				}				
+			}
+			
+			$future_class = '';
+			$route_list .= '</thead>';		
+			$route_list .= '<tbody>';		
+			
+			foreach ( $list_data as $list_item => $list_value ) {
+				
+				/* Check if we need to add the css class to color the future td */ 
+				if ( empty( $future_class ) ) {
+					$future_class = ( $list_value['future'] ) ? 'class="nwm-future-color"' : '' ;
+				}
+				
+				$route_list .= '<tr ' . $future_class . '>';
+				$route_list .= '<td>' . $i . '</td>';
+				
+				/* Check if we need to show the url */
+				if ( !empty( $list_value['url'] ) ) {
+					$route_list .= '<td><a href="' . esc_url( $list_value['url'] ) . '">' . esc_html( $list_value['location'] ) . '</a></td>';
+				} else {
+					$route_list .= '<td>' . esc_html( $list_value['location'] ) . '</td>';
+				}
+				
+				/* Check if we need to show arrival / departure dates */
+				if ( !empty( $dates ) ) {
+					$arrival_date = ( !empty( $list_value['arrival'] ) ) ? $list_value['arrival'] : ' - ';
+					$departure_date = ( !empty( $list_value['departure'] ) ) ? $list_value['departure'] : ' - ';
+					
+					switch ( $dates ) {
+						case 'all':
+							$route_list .= '<td>' . esc_html( $arrival_date ) . '</td>';
+							$route_list .= '<td>' . esc_html( $departure_date ) . '</td>';
+							break;
+						case 'arrival':
+							$route_list .= '<td>' . esc_html( $arrival_date ) . '</td>';
+							break;	
+						case 'departure':
+							$route_list .= '<td>' . esc_html( $departure_date ) . '</td>';
+							break;
+					}				
+				}					
+				
+				$route_list .= '</tr>';
+				$i++;
+			} // end foreach
+			
+			$route_list .= '</tbody>';
+			$route_list .= '</table>';					
+		}
+		
+		set_transient( 'nwm_route_list_'.$id, $route_list ); 
+	}
+	
+	return $route_list;
+	
+}
 
 /* show all routes on the map */
 function nwm_show_full_map( $atts, $content = null ) {
@@ -11,21 +159,29 @@ function nwm_show_full_map( $atts, $content = null ) {
 	extract( shortcode_atts( array (
 	  "width" => '',
 	  "height" => '',
+	  "id" => ''
 	), $atts ) ); 
-			
+	
+	/* Check if we have a valid id, otherwise just set it to 1 (default map) */
+	if ( !absint ( $id ) ) {
+		$id = 1;	
+	}
+					
 	/* Check if there is an existing transient we can use */
-	if ( false === ( $frontend_data = get_transient( 'nwm_locations' ) ) ) {	
+	if ( false === ( $frontend_data = get_transient( 'nwm_locations_'.$id ) ) ) {	
 		$settings = get_option( 'nwm_settings' );
 		$nwm_route_order = get_option( 'nwm_route_order' );
-		$date_format = 'M j, Y';
+		$date_format = get_option( 'date_format' );
+		$route_order = esc_sql( implode( ',', wp_parse_id_list( $nwm_route_order[$id] ) ) );
 		$i = 0;	
 		$json_data = '';
 		$zoom_to = '';
-		
+
 		$nwm_location_data = $wpdb->get_results("
 												SELECT nwm_id, post_id, lat, lng, location, arrival, departure
 												FROM $wpdb->nwm_routes
-												ORDER BY field(nwm_id, $nwm_route_order)
+												WHERE nwm_id IN ($route_order)
+												ORDER BY field(nwm_id, $route_order)
 												"
 											    );	
 																				
@@ -53,9 +209,10 @@ function nwm_show_full_map( $atts, $content = null ) {
 			if ( ( $settings['zoom_to'] == 'first' ) && ( $i == 0 ) ) {
 				$zoom_to = $nwm_location->lat.','.$nwm_location->lng;	
 			}
-		
+			
+			/* If we have no post_id get the data from the custom table*/
 			if ( !$nwm_location->post_id ) {
-				$nwm_custom_data = $wpdb->get_results(" SELECT content, url, title FROM $wpdb->nwm_custom WHERE nwm_id = $nwm_location->nwm_id ");
+				$nwm_custom_data = $wpdb->get_results( 'SELECT content, url, title FROM' . $wpdb->nwm_custom . 'WHERE nwm_id =' . absint( $nwm_location->nwm_id ) . '' );
 				$custom_content = '';	
 				$custom_url = '';
 				$custom_title = '';	
@@ -125,7 +282,7 @@ function nwm_show_full_map( $atts, $content = null ) {
 			}
 		}
 						 
-		set_transient( 'nwm_locations', $frontend_data, $transient_lifetime ); 
+		set_transient( 'nwm_locations_'.$id, $frontend_data, $transient_lifetime ); 
 	}
 
 	/* Load the required front-end scripts and set the js data */
@@ -142,6 +299,7 @@ function nwm_show_full_map( $atts, $content = null ) {
 	} else {
 		$height = '';	
 	}
+	$output = '';
     
 	$output .= '<!-- Nomad World Map - http://nomadworldmap.com -->';
 	$output .= '<div class="nwm-wrap" ' . $width . '>'; 
@@ -154,6 +312,7 @@ function nwm_show_full_map( $atts, $content = null ) {
 	$output .= '</div>';	
 
 	return $output;	
+	
 }
 
 /* Collect the excerpt, thumbnail and permalink that belongs to the $post_id */
@@ -220,6 +379,8 @@ function nwm_frontend_scripts( $frontend_data ) {
 
 	$params = array(
 		'lines' => $frontend_data['settings']['flightpath'],
+		'curvedLines' => $frontend_data['settings']['curved_lines'],
+		'mapType' => $frontend_data['settings']['map_type'],
 		'thumbCircles' => $frontend_data['settings']['round_thumbs'],
 		'zoomLevel' => $frontend_data['settings']['zoom_level'],
 		'zoomTo' => $frontend_data['settings']['zoom_to'],

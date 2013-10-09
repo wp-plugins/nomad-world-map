@@ -22,8 +22,8 @@ More Info:		http://nomadworldmap.com
 	height:350px;
 }
 
-.nwm-back, 
-.nwm-forward,
+#nwm-destination-list .nwm-back, 
+#nwm-destination-list .nwm-forward,
 .marker-content div .nwm-thumb,
 .nwm-active-destination div .nwm-thumb {
 	background:url(../img/graphic.png) left top no-repeat;
@@ -71,6 +71,7 @@ More Info:		http://nomadworldmap.com
 }
 #nwm-destination-list p {
 	margin:10px 0 0 0;
+	color:#000;
 }
 	
 #nwm-destination-list ul {
@@ -138,23 +139,26 @@ More Info:		http://nomadworldmap.com
 
 .nwm-map-carousel .nwm-control {top:45%;}
 
-.nwm-back, 
-.nwm-forward {
+#nwm-destination-list .nwm-back, 
+#nwm-destination-list .nwm-forward {
 	height:20px; 
 	width:11px;
+	padding:0;
+	margin:0;
 }
-.nwm-back {
+
+#nwm-destination-list .nwm-back {
 	left:15px; 
 	background-position:0 -20px;
 }
-.nwm-back:hover {
+#nwm-destination-list .nwm-back:hover {
 	background-position:0 0;
 }
-.nwm-forward {
+#nwm-destination-list .nwm-forward {
 	right:15px; 
 	background-position:-11px -20px;
 }
-.nwm-forward:hover {
+#nwm-destination-list .nwm-forward:hover {
 	background-position:-11px 0;
 }
 
@@ -193,6 +197,7 @@ span.nwm-circle {
 	box-shadow:0 1px 2px rgba(0, 0, 0, 0.5);
 	white-space:nowrap;
 	font-size:12px;
+	color:#000;
 }
 .marker-style span {
 	font-weight:normal; 
@@ -268,6 +273,9 @@ span.nwm-circle {
 	line-height:23px; 
 	margin-bottom:3px;
 }
+
+/* Location list table styles  */
+.nwm-future-color {background-color:#fcfcfc;}
 
 @media (max-width: 800px) {
 	#nwm-destination-list ul {

@@ -9,6 +9,8 @@ function nwm_default_settings() {
 	if ( !$settings_check ) {
 		$settings = array(
 			'flightpath' => 1,
+			'curved_lines' => 0,
+			'map_type' => 'roadmap',
 			'round_thumbs' => 1,
 			'zoom_to' => 'first',
 			'zoom_level' => '3',
@@ -20,6 +22,13 @@ function nwm_default_settings() {
 		);
 			
 		update_option( 'nwm_settings', $settings );
+	}
+	
+	$maps_check = get_option( 'nwm_map_ids' );
+	
+	if ( !$maps_check ) {
+		$maps = array( '1' => 'Default' );
+		update_option( 'nwm_map_ids', $maps );
 	}
 	
 }
@@ -39,6 +48,7 @@ function nwm_create_tables() {
 		$sql = "CREATE TABLE " . $wpdb->nwm_routes . " (
 						     nwm_id int(10) unsigned NOT NULL auto_increment,
 							 post_id bigint(20) unsigned NOT NULL,
+							 thumb_id bigint(20) unsigned NOT NULL,
 							 schedule tinyint(1) NOT NULL,
 							 lat float(10,6) NOT NULL,
 							 lng float(10,6) NOT NULL,
