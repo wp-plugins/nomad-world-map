@@ -3,7 +3,7 @@ Contributors: tijmensmit
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 3.6.1
-Stable tag: 1.1
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,9 @@ You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vot
 
 
 == Changelog ==
+
+= 1.1.1 =
+* Fixed the script that is used to delete the map cache. This script triggered a php warning during install.
 
 = 1.1 =
 * Added support for multiple independent maps

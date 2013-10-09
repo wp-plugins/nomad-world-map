@@ -738,9 +738,11 @@ function nwm_delete_all_transients() {
 
 	$option_values = get_option( 'nwm_post_ids' );
 
-	foreach ( $option_values as $map_id => $post_sids )	{
-		nwm_delete_transients( $map_id );
-	}	
+	if ( !empty( $option_values ) ) {
+		foreach ( $option_values as $map_id => $post_ids )	{
+			nwm_delete_transients( $map_id );
+		}	
+	}
 	
 }
 
