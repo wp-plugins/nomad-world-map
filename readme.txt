@@ -2,8 +2,8 @@
 Contributors: tijmensmit
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
-Tested up to: 3.6
-Stable tag: 1.0.4
+Tested up to: 3.6.1
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,7 +18,10 @@ The location content itself is shown in a carousel underneath the map. When you 
 
 = Features include: =
 
-* Set custom line colors for the past and future travel routes.
+* Create multiple independent maps
+* Show a list of visited locations with optional arrival and departure dates
+* Set custom thumbnails for each location
+* Set custom line colors for the past and future travel routes
 * Rearrange the order of the travel route by dragging the items up or down in the route list.
 * Specify if you want the map to zoom to the first or last location of your travel route.
 * Choose from three different content types for each location. Either link to a blog post, write a custom description or show the travel dates.
@@ -42,6 +45,29 @@ Add this shortcode [nwm_map] to the page where you want to display the map.
 
 Yes, just add the width and height as an attribute to the shortcode. `[nwm_map height="500" width="500"]`
 
+= How do I specify which map is shown? =
+
+You can add the id attribute to the `[nwm_map id="3"]` shortcode. This will show the map with ID 3 on your page.
+
+= Can I show a list of all the destination on the map? =
+
+Yes, this shortcode `[nwm_list id="1"]` will show the destination list for the map with id 1. If no ID is set, it will default to 1.
+
+Other shortcode options for the list:
+
+`[nwm_list id="1" dates="all"]` Show both the arrival and departure dates 
+`[nwm_list id="1" dates="arrival"]` Only show the arrival dates 
+`[nwm_list id="1" dates="departure"]` Only show the arrival dates 
+
+= When I search for a blog post title it returns no results? =
+
+Make sure the blog post you search for is published, and that it matches exactly with the title you see in the blog post editor. 
+Otherwise please open a support request in the [support form] (http://wordpress.org/support/plugin/nomad-world-map)
+
+= Where can I suggest new features? =
+
+You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vote for existing suggestions from others
+
 == Screenshots ==
 
 1. Front-end of the plugin
@@ -50,6 +76,20 @@ Yes, just add the width and height as an attribute to the shortcode. `[nwm_map h
 
 
 == Changelog ==
+
+= 1.1 =
+* Added support for multiple independent maps
+* Added a new shortcode that will show a list of all destinations [nwm_list]
+* Added the option to set custom thumbnails for each destination
+* Added the option to set different map types (roadmap, terrain, satellite, hybrib)
+* Added the option to show either straight or curved lines between the markers on the map
+* Modified the used date format on the front-end, it will now use the date format that is set in WordPress (general settings).
+* Improved the removal of multiple route items
+* Fixed the blog title search breaking with strange characters
+
+= 1.0.4 =
+* Fixed the handling of custom travel dates for php versions lower then 5.3
+* Changed the shortcode output so that the map can also be placed between content, and doesn't always ends up on top of the content
 
 = 1.0.3 =
 * Fixed a situation where an invalid zoom level value would break the entire map
