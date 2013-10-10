@@ -736,10 +736,10 @@ function nwm_faq() {
 /* Delete all map transients */
 function nwm_delete_all_transients() {
 
-	$option_values = get_option( 'nwm_post_ids' );
-
-	if ( !empty( $option_values ) ) {
-		foreach ( $option_values as $map_id => $post_ids )	{
+	$map_values = get_option( 'nwm_map_ids' );
+	
+	if ( !empty( $map_values ) ) {
+		foreach ( $map_values as $map_id => $map_name )	{
 			nwm_delete_transients( $map_id );
 		}	
 	}
