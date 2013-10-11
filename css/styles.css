@@ -178,11 +178,12 @@ More Info:		http://nomadworldmap.com
 	background-position:-23px 0;
 	background-color:#ebebeb;
 }
-
 #nwm-destination-list img,
 span.nwm-circle {
-	border-radius:33px !important;
 	box-shadow:none;
+}
+#nwm-destination-list .nwm-circle {	
+	border-radius:33px !important;
 }
 .nwm-content {
 	float:left; 
@@ -275,7 +276,20 @@ span.nwm-circle {
 }
 
 /* Location list table styles  */
-.nwm-future-color {background-color:#fcfcfc;}
+#nwm-route-list {border-bottom:1px solid #EDEDED;}
+#nwm-route-list th {height:auto !important;}
+#nwm-route-list th, 
+#nwm-route-list td {
+	text-align:left !important; 
+	padding:5px 10px 5px 0;
+	border-top:1px solid #EDEDED;
+}
+#nwm-route-list .nwm-location-count {
+	width:25px; 
+	padding-left:10px; 
+	padding-right:15px;
+}
+#nwm-route-list .nwm-future-color {background-color:#fcfcfc;}
 
 @media (max-width: 800px) {
 	#nwm-destination-list ul {

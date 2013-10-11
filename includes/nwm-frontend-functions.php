@@ -17,9 +17,7 @@ function nwm_show_list( $atts, $content = null ) {
 	/* Check if we have a valid id, otherwise just set it to 1 (default map) */
 	if ( !absint ( $id ) ) {
 		$id = 1;	
-	}	
-	
-	delete_transient( 'nwm_route_list_'.$id );
+	}
 	
 	/* Check if there is an existing transient we can use */
 	if ( false === ( $route_list = get_transient( 'nwm_route_list_'.$id ) ) ) {	
@@ -51,8 +49,14 @@ function nwm_show_list( $atts, $content = null ) {
 			
 			/* If we have no post_id get the data from the custom table*/
 			if ( !$nwm_location->post_id ) {
-				$nwm_custom_data = $wpdb->get_results( 'SELECT url, title FROM' . $wpdb->nwm_custom . 'WHERE nwm_id =' . absint( $nwm_location->nwm_id ) . '' );
-				$post_data_part = array( 'url' => '',
+				$nwm_custom_data = $wpdb->get_results( 'SELECT url FROM ' . $wpdb->nwm_custom . ' WHERE nwm_id = ' . absint( $nwm_location->nwm_id ) . '' );
+				$custom_url = '';
+
+				if ( count( $nwm_custom_data ) ) {
+					$custom_url = esc_url( $nwm_custom_data[0]->url );
+				}
+				
+				$post_data_part = array( 'url' => $custom_url,
 								   		 'arrival' => nwm_convert_date_format( $date_format, $nwm_location->arrival ),
 								  		);	
 			} else {
@@ -108,7 +112,7 @@ function nwm_show_list( $atts, $content = null ) {
 				}
 				
 				$route_list .= '<tr ' . $future_class . '>';
-				$route_list .= '<td>' . $i . '</td>';
+				$route_list .= '<td class="nwm-location-count">' . $i . '</td>';
 				
 				/* Check if we need to show the url */
 				if ( !empty( $list_value['url'] ) ) {
@@ -178,7 +182,7 @@ function nwm_show_full_map( $atts, $content = null ) {
 		$zoom_to = '';
 
 		$nwm_location_data = $wpdb->get_results("
-												SELECT nwm_id, post_id, lat, lng, location, arrival, departure
+												SELECT nwm_id, post_id, thumb_id, lat, lng, location, arrival, departure
 												FROM $wpdb->nwm_routes
 												WHERE nwm_id IN ($route_order)
 												ORDER BY field(nwm_id, $route_order)
@@ -212,11 +216,11 @@ function nwm_show_full_map( $atts, $content = null ) {
 			
 			/* If we have no post_id get the data from the custom table*/
 			if ( !$nwm_location->post_id ) {
-				$nwm_custom_data = $wpdb->get_results( 'SELECT content, url, title FROM' . $wpdb->nwm_custom . 'WHERE nwm_id =' . absint( $nwm_location->nwm_id ) . '' );
+				$nwm_custom_data = $wpdb->get_results( 'SELECT content, url, title FROM ' . $wpdb->nwm_custom . ' WHERE nwm_id = ' . absint( $nwm_location->nwm_id ) . '' );
 				$custom_content = '';	
 				$custom_url = '';
 				$custom_title = '';	
-				
+
 				if ( count( $nwm_custom_data ) ) {
 					$custom_content = esc_html( $nwm_custom_data[0]->content );
 					$custom_url = esc_url( $nwm_custom_data[0]->url );
@@ -229,7 +233,7 @@ function nwm_show_full_map( $atts, $content = null ) {
 								    'title' => $custom_title,
 								    'url' => $custom_url,
 								    'location' => esc_html( $nwm_location->location ),
-								    'thumb' => '',
+								    'thumb' => nwm_get_thumb( $nwm_location->thumb_id ),
 								    'date' => '',
 								    'arrival' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->arrival ) ),
 								    'departure' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->departure ) ),
@@ -318,13 +322,12 @@ function nwm_show_full_map( $atts, $content = null ) {
 /* Collect the excerpt, thumbnail and permalink that belongs to the $post_id */
 function nwm_collect_post_data( $nwm_location, $publish_date, $future, $date_format ) {	
 	
-	$thumb = wp_get_attachment_image_src( get_post_thumbnail_id( $nwm_location->post_id ), 'thumbnail' );
 	$excerpt = nwm_get_post_excerpt( $nwm_location->post_id );
 	$permalink = get_permalink( $nwm_location->post_id );
 	$title = get_the_title( $nwm_location->post_id );
 	
 	$nwm_post_data = array( 'nwm_id' => ( int ) $nwm_location->nwm_id,
-							'thumb' => esc_url( $thumb[0] ),
+							'thumb' => esc_url( nwm_get_thumb( $nwm_location->thumb_id ) ),
 							'url' => esc_url( $permalink ),
 						    'content' => esc_html( $excerpt ),
 						    'title' => esc_html( $title ),
@@ -337,6 +340,15 @@ function nwm_collect_post_data( $nwm_location, $publish_date, $future, $date_for
 	
 	return $nwm_post_data;
 	
+}
+
+/* Get the thumb src based on the thumb_id */
+function nwm_get_thumb( $thumb_id ) {	
+	$thumb = wp_get_attachment_image_src( $thumb_id, 'thumbnail' );	
+	
+	if ( !empty( $thumb[0] ) ) {
+		return $thumb[0];
+	}
 }
 
 /* Change the date format from example 2013-06-28 00:00:00 into M j, Y */

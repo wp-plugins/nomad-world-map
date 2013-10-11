@@ -3,7 +3,7 @@ Contributors: tijmensmit
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 3.6.1
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,7 +62,7 @@ Other shortcode options for the list:
 = When I search for a blog post title it returns no results? =
 
 Make sure the blog post you search for is published, and that it matches exactly with the title you see in the blog post editor. 
-Otherwise please open a support request in the [support form] (http://wordpress.org/support/plugin/nomad-world-map)
+Otherwise please open a support request in the support form.
 
 = Where can I suggest new features? =
 
@@ -71,11 +71,18 @@ You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vot
 == Screenshots ==
 
 1. Front-end of the plugin
-2. Setting screen
+2. Settings screen
 3. The route editor
 
 
 == Changelog ==
+
+= 1.1.3 =
+* Fixed custom thumbnails not showing up for travel dates
+* Fixed a bug where the location thumbnail was shown in a square instead of a circle on the map
+* Fixed the title of the custom content not being displayed correctly in the slider under the map
+* Fixed a notification message sometimes appearing twice in the route editor
+* Changed the css for the generated route list
 
 = 1.1.2 =
 * Fixed changes to the settings not always clearing the map cache correctly. This only happened if the map contained just custom content and travel dates. 
@@ -89,7 +96,7 @@ You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vot
 * Added the option to set custom thumbnails for each destination
 * Added the option to set different map types (roadmap, terrain, satellite, hybrib)
 * Added the option to show either straight or curved lines between the markers on the map
-* Modified the used date format on the front-end, it will now use the date format that is set in WordPress (general settings).
+* Modified the used date format on the front-end, it will now use the date format that is set in WordPress (general settings)
 * Improved the removal of multiple route items
 * Fixed the blog title search breaking with strange characters
 

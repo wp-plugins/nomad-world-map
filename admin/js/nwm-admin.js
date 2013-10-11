@@ -737,6 +737,7 @@ function updateDestination( markerContentOption, nwmId, thumbId, latlng, locatio
 		lastData = {
 			nwm_id: nwmId,
 			thumb_id: thumbId,
+			map_id: $("#nwm-map-list").val(),
 			previous: $("#nwm-post-type").val(),
 			custom: {
 				latlng:	latlng,
@@ -752,6 +753,7 @@ function updateDestination( markerContentOption, nwmId, thumbId, latlng, locatio
 		lastData = {
 			nwm_id: nwmId,
 			thumb_id: thumbId,
+			map_id: $("#nwm-map-list").val(),
 			previous: $("#nwm-post-type").val(),
 			schedule: {
 				latlng:	latlng,
@@ -826,7 +828,7 @@ function updateDestination( markerContentOption, nwmId, thumbId, latlng, locatio
 				}
 				
 				if ( !tr.attr('data-travel-schedule') && ( markerContentOption == 'nwm-travel-schedule' ) ) {
-					tr.attr({'data-post-id' : 0, 'nwm-travel-schedule' : 1});
+					tr.attr({'data-post-id' : 0, 'data-travel-schedule' : 1});
 					/*
 					Make sure the url value from the blog post excerpt field is empty. If there first was a blog post excerpt, 
 					but it is later changed to a travel schedule, the url would still contain a value.
@@ -835,16 +837,27 @@ function updateDestination( markerContentOption, nwmId, thumbId, latlng, locatio
 					$("#nwm-post-id").val('0');
 				}
 				
-				if ( typeof( response.url ) !== 'undefined' ) {
+				if ( ( typeof( response.url ) !== 'undefined' ) && ( response.url !== '' ) ) {
 					tr.find('.nwm-url').html('<a href="' + response.url + '">' + response.url + '</a>');
 				} else {
 					tr.find('.nwm-url').empty();
+				}
+				
+				/* If the last submitted value was a schedule, then empty the custom input fields and blog post url */
+				if ( response.type == 'schedule' ) {
+					$("#nwm-custom-text input, #nwm-custom-desc").val('');
+					$("#nwm-search-link span").empty(); 
+					$("#nwm-post-id").val('0');	
 				}
 
 				/* Update the name of the dropdown list */
 				listOrder = tr.find('.nwm-order span').html();
 				$("#nwm-edit-list option[value=" + nwmId + "]").html(listOrder + ' - ' + location);
-				$(".nwm-delete-btn-wrap").after( '<span class="nwm-save-msg">Location updated...</span>' );
+				
+				/* Make sure we only add the msg once */
+				if ( !$("#nwm-form .nwm-save-msg").length ) {
+					$(".nwm-delete-btn-wrap").after( '<span class="nwm-save-msg">Location updated...</span>' );
+				}
 				
 				/* Check if we need to update, or remove the current dates */
 				if ( $("#nwm-from-date").val() ) {
@@ -998,6 +1011,7 @@ function updateSortOrder( sortedItem ) {
 	
 	/* Update the dropdown list with the new order */
 	populateDropdown( dropdownList );
+	$("#nwm-edit-destination #nwm-form").hide();
 	
 	/* Remove the trailing , */
 	routeOrder = routeOrder.substring(0, routeOrder.length - 1);
@@ -1124,6 +1138,7 @@ function editForm() {
 		
 	$('#nwm-edit-list option:first').prop('selected',true);
 	$("#nwm-add-destination form").remove();
+	$("#nwm-edit-list").removeClass('nwm-error');
 	
 	if ( $("#nwm-edit-destination #nwm-form").length == 0 ) {
 		$("#nwm-edit-destination p").after(form);
@@ -1225,6 +1240,7 @@ $("#nwm-blog-excerpt").on( 'click', 'input[type=button]', function( e ) {
 
 /* Handle changes to the edit list */
 $("#nwm-edit-list").change( function() {
+	$("#nwm-edit-list").removeClass('nwm-error');
 	setEditFormContent( $(this).val() );
 });
 
@@ -1251,17 +1267,17 @@ function setEditFormContent( dropdownValue ) {
 		$("#nwm-edit-destination form").show();
 
 		$("#nwm-destination-list tbody tr").each( function( index ) {
-			routeId = $(this).data('nwm-id');
+			routeId = $(this).attr('data-nwm-id');
 
 			/* Check if the ID on the tr element matches with the id from the dropdown list */					
 			if ( routeId == dropdownValue ) {
 				destination = $('[data-nwm-id="' + routeId + '"] .nwm-location').text();
 				tr = $("#nwm-destination-list tbody tr:eq('" + index + "')");
-				latlng = tr.data('latlng');
-				postId = tr.data('post-id');
-				thumbId = tr.find(".nwm-thumb-td img").data('thumb-id');
+				latlng = tr.attr('data-latlng');
+				postId = tr.attr('data-post-id');
+				thumbId = tr.find(".nwm-thumb-td img").attr('data-thumb-id');
 				thumbSrc = tr.find(".nwm-thumb-td img").attr('src');
-				travelSchedule = tr.data('travel-schedule');
+				travelSchedule = tr.attr('data-travel-schedule');
 				
 				/* If we have no src then show the placeholder */
 				if ( typeof( thumbSrc ) !== 'undefined' ) {
@@ -1274,7 +1290,7 @@ function setEditFormContent( dropdownValue ) {
 				checkEditButton( routeId );
 
 				/* Check if we need to show the excerpt edit fields, the custom text or the travel schedule */
-				if ( postId ) {
+				if ( postId != 0 ) {
 					postType = 'blog';
 					url = $('[data-nwm-id="' + routeId + '"] .nwm-url').html();
 					$("#nwm-search-link span").html( url );
@@ -1404,7 +1420,7 @@ function checkEditButton( routeId ) {
 }
 
 /* Check if we need to enable the calendars */
-if($("#nwm-from-date").length) {
+if ( $("#nwm-from-date").length ) {
 	loadCalendar(); 
 }
 

@@ -308,8 +308,6 @@ function checkHeaderFormat( markerUrl, markerTitle, destination, futureLocation 
 	
 	if ( markerUrl ) {
 		title = '<a href="' + markerUrl + '">' + markerTitle + '</a>';
-	} else if ( futureLocation ) {
-		title = destination;	
 	} else {
 		if ( markerTitle ) {
 			title = markerTitle;
