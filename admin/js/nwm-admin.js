@@ -9,7 +9,7 @@ var map, geocoder, preloadImgSrc, uploadFrame,
 	defaultLatlng = new google.maps.LatLng('52.378153', '4.899363'),
 	url = window.location.href;
 
-/* Load the Google Maps */
+/* Load Google Maps */
 function initializeGmap() {
 	var draggable, alt,
 		myOptions = {
@@ -20,6 +20,7 @@ function initializeGmap() {
 		};
 
 	map = new google.maps.Map( document.getElementById("gmap-nwm"), myOptions );
+	geocoder = new google.maps.Geocoder();	
 	rebuildFlightPlan();
 }
 
@@ -1644,7 +1645,6 @@ $("#nwm-reset-thumb").on( 'click', function() {
 
 /* Load the map */
 if ( $("#gmap-nwm").length ) {
-	geocoder = new google.maps.Geocoder();
 	google.maps.event.addDomListener( window, 'load', initializeGmap );
 }
                 

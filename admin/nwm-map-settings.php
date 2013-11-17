@@ -2,6 +2,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 function nwm_settings_page() {
+	
+	global $wpdb;	 
 		
 	$options = get_option( 'nwm_settings' );
 	?>
@@ -25,10 +27,6 @@ function nwm_settings_page() {
                                 <p <?php if ( $options['flightpath'] != '1' ) { echo 'style="display:none;"'; } ?>   class="nwm-curved-option">
                                    <label for="nwm-curved-lines"><?php _e( 'Draw curved lines on the map?', 'nwm' ); ?></label> 
                                    <input id="nwm-curved-lines" type="checkbox" name="nwm-curved-lines" value="" <?php checked( $options['curved_lines'] == '1', true ); ?> />
-                                </p>  
-                                <p>
-                                   <label for="nwm-round-thumbs"><?php _e( 'Show the post thumbnails in a circle?', 'nwm' ); ?></label> 
-                                   <input id="nwm-round-thumbs" type="checkbox" name="nwm-round-thumbs" value="" <?php checked( $options['round_thumbs'] == '1', true ); ?> />
                                 </p>            
                                 <p>
                                     <label for="nwm-zoom-to"><?php _e( 'On pageload zoom to:', 'nwm' ); ?></label> 
@@ -52,6 +50,36 @@ function nwm_settings_page() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <div class="metabox-holder">
+                        <div class="postbox">
+                            <div title="Click to toggle" class="handlediv"><br></div>
+                            <h3 class="hndle"><span><?php _e( 'Content Options', 'nwm' ); ?></span></h3>
+                            <div class="inside">
+                                <p>
+                                   <label for="nwm-round-thumbs"><?php _e( 'Show the post thumbnails in a circle?', 'nwm' ); ?></label> 
+                                   <input id="nwm-round-thumbs" type="checkbox" name="nwm-round-thumbs" value="" <?php checked( $options['round_thumbs'] == '1', true ); ?> />
+                                </p>  
+                                <p>
+                                   <label for="nwm-readmore"><?php _e( 'Include a "read more" link for blog post?', 'nwm' ); ?></label> 
+                                   <input id="nwm-readmore" type="checkbox" name="nwm-readmore" value="" <?php checked( $options['read_more'] == '1', true ); ?> />
+                                </p> 
+                                <p>
+                                    <label><?php _e( 'Show the location content in the:', 'nwm' ); ?></label>
+                                    <span class="nwm-radioboxes">
+                                        <input type="radio" id="nwm-content-slider" name="nwm-content-location" <?php checked( 'slider', $options['content_location'], true ); ?> value="slider" />
+                                        <label for="nwm-content-slider"><?php _e( 'Slider', 'nwm' ); ?></label>
+                                        <input type="radio" id="nwm-content-tooltip" name="nwm-content-location" <?php checked( 'tooltip', $options['content_location'], true ); ?> value="tooltip" />
+                                        <label for="nwm-content-tooltip"><?php _e( 'Tooltip (this will remove the slider)', 'nwm' ); ?></label>
+                                    </span>
+                                </p>
+                                <p>
+                                   <label for="nwm-location-header"><?php _e( 'Show the location name under the header?', 'nwm' ); ?></label> 
+                                   <input id="nwm-location-header" type="checkbox" name="nwm-location-header" value="" <?php checked( $options['location_header'] == '1', true ); ?> />
+                                </p>
+                            </div>        
+                        </div>   
                     </div>
                     
                     <div class="metabox-holder">
@@ -93,7 +121,7 @@ function nwm_settings_page() {
                             <h3 class="hndle"><span><?php _e( 'About', 'nwm' ); ?></span><span style="float:right;">Version <?php echo NWN_VERSION_NUM; ?></span></h3>
                             <div class="inside">
                                 <p><strong>Nomad World Map</strong> by <a href="http://twitter.com/tijmensmit">Tijmen Smit</a>.</p>
-                                <p>If you like this plugin, please rate it <strong>5 stars</strong> on <a href="http://wordpress.org/plugins/nomad-world-map/">WordPress.org</a>.
+                                <p>If you like this plugin, please rate it <strong>5 stars</strong> on <a href="http://wordpress.org/plugins/nomad-world-map/">WordPress.org </a>or consider making a <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=NFZ6NCFKXQ8EA">donation</a> to support the development.</p>
                             </div>
                         </div>
                 	</div>        
@@ -122,7 +150,7 @@ function nwm_settings_check() {
 		$output['zoom_to'] = 'last';
 	}
 	
-	/* Check if we have a valid map type, otherwise set it to last */
+	/* Check if we have a valid map type, otherwise set it to roadmap */
 	if ( in_array( $_POST['nwm-map-type'], $map_types ) ) {
 		$output['map_type'] = wp_filter_nohtml_kses( $_POST['nwm-map-type'] );
 	} else {
@@ -130,7 +158,7 @@ function nwm_settings_check() {
 	}
 	
 	/* Check if we have a valid zoom level, it has to be between 1 or 12. If not set it to the default of 3 */
-	if ( $_POST['nwm-zoom-level'] >= 1 || $_POST['nwm-zoom-level'] <= 12 ) {
+	if ( $_POST['nwm-zoom-level'] >= 1 && $_POST['nwm-zoom-level'] <= 12 ) {
 		$output['zoom_level'] = $_POST['nwm-zoom-level'];
 	} else {
 		$output['zoom_level'] = 3;	
@@ -144,6 +172,9 @@ function nwm_settings_check() {
 	$output['streetview'] = isset( $_POST['nwm-streetview'] ) ? 1 : 0;	
 	$output['control_position'] = ( wp_filter_nohtml_kses( $_POST['nwm-control-position']  == 'left') ) ? 'left' : 'right';	
 	$output['control_style'] = ( wp_filter_nohtml_kses( $_POST['nwm-control-style'] == 'small' ) ) ? 'small' : 'large';
+	$output['read_more'] = isset( $_POST['nwm-readmore'] ) ? 1 : 0;
+	$output['location_header'] = isset( $_POST['nwm-location-header'] ) ? 1 : 0;
+	$output['content_location'] = ( wp_filter_nohtml_kses( $_POST['nwm-content-location'] == 'slider') ) ? 'slider' : 'tooltip';
 	
 	nwm_delete_all_transients();
 	

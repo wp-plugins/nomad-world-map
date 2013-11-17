@@ -75,7 +75,7 @@ More Info:		http://nomadworldmap.com
 }
 	
 #nwm-destination-list ul {
-	margin:0 15%;
+	margin:0 15% !important;
 }	
 #nwm-destination-list li {
 	float:left; 
@@ -83,6 +83,7 @@ More Info:		http://nomadworldmap.com
 	width:100%; 
 	display:none; 
 	list-style:none;
+	margin:0 !important;
 }
 #nwm-destination-list .nwm-preloader {
 	position:absolute; 
@@ -182,6 +183,7 @@ More Info:		http://nomadworldmap.com
 span.nwm-circle {
 	box-shadow:none;
 }
+#nomad-world-map .nwm-circle,
 #nwm-destination-list .nwm-circle {	
 	border-radius:33px !important;
 }
@@ -191,8 +193,10 @@ span.nwm-circle {
 }
 
 #nomad-world-map div.marker-style {
+	float:left;
 	position:relative;
 	padding:6px 12px;
+	min-width:175px;
 	background:#fff; 
 	border-radius:3px; 
 	box-shadow:0 1px 2px rgba(0, 0, 0, 0.5);
@@ -200,6 +204,7 @@ span.nwm-circle {
 	font-size:12px;
 	color:#000;
 }
+
 .marker-style span {
 	font-weight:normal; 
 	margin-top:2px;
@@ -274,6 +279,46 @@ span.nwm-circle {
 	line-height:23px; 
 	margin-bottom:3px;
 }
+
+#nwm-destination-list .nwm-read-more {
+	display:inline; 
+	margin-left:5px;
+}
+
+/* Tooltip content */
+.nwm-no-slider #nomad-world-map div.marker-style {
+	padding:10px;
+}
+
+#nomad-world-map .nwm-marker-wrap {display:table;}
+#nomad-world-map .nwm-marker-img {
+	float: left; 
+	display:table-cell;
+	width: 64px; 
+	margin-right: 10px;
+}
+
+#nomad-world-map .marker-txt {
+    display: table-cell;
+    vertical-align: top;
+}
+
+#nomad-world-map .marker-txt p,
+#nomad-world-map .marker-txt span {
+	font-size: 12px !important;
+}
+
+.marker-txt h2, .marker-txt h2 a {
+	margin:0; 
+	font-size:14px;
+	font-weight:bold; 
+	line-height:normal; 
+	clear:none;
+}
+.marker-txt h2 span, .nwm-read-more {display:block;}
+.marker-txt p {margin:0;}
+
+#nomad-world-map .nwm-read-more {font-size:12px !important;}
 
 /* Location list table styles  */
 #nwm-route-list {border-bottom:1px solid #EDEDED;}

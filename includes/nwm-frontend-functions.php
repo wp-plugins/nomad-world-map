@@ -15,7 +15,7 @@ function nwm_show_list( $atts, $content = null ) {
 	), $atts ) ); 
 		
 	/* Check if we have a valid id, otherwise just set it to 1 (default map) */
-	if ( !absint ( $id ) ) {
+	if ( !absint( $id ) ) {
 		$id = 1;	
 	}
 	
@@ -163,17 +163,32 @@ function nwm_show_full_map( $atts, $content = null ) {
 	extract( shortcode_atts( array (
 	  "width" => '',
 	  "height" => '',
-	  "id" => ''
+	  "id" => '',
+	  "zoom" => '',
+	  "content" => ''
 	), $atts ) ); 
 	
 	/* Check if we have a valid id, otherwise just set it to 1 (default map) */
-	if ( !absint ( $id ) ) {
+	if ( !absint( $id ) ) {
 		$id = 1;	
+	}	
+	
+	$settings = get_option( 'nwm_settings' );
+	
+	/* 
+	Check if the content type is set through the shortcode, 
+	if so we overwrite the value set through the admin panel 
+	*/	
+	if ( !empty( $content ) ) {
+		$allowed_content =  array( 'tooltip', 'slider' );
+		
+		if ( in_array( $content, $allowed_content ) ) {
+			$settings['content_location'] = $content;
+		}
 	}
 					
 	/* Check if there is an existing transient we can use */
 	if ( false === ( $frontend_data = get_transient( 'nwm_locations_'.$id ) ) ) {	
-		$settings = get_option( 'nwm_settings' );
 		$nwm_route_order = get_option( 'nwm_route_order' );
 		$date_format = get_option( 'date_format' );
 		$route_order = esc_sql( implode( ',', wp_parse_id_list( $nwm_route_order[$id] ) ) );
@@ -227,28 +242,29 @@ function nwm_show_full_map( $atts, $content = null ) {
 					$custom_title = esc_html( $nwm_custom_data[0]->title );
 				}
 
-				$post_data = array( 'nwm_id' => (int) $nwm_location->nwm_id,
-								    'post_id' => 0,
-								    'content' => $custom_content,
-								    'title' => $custom_title,
-								    'url' => $custom_url,
-								    'location' => esc_html( $nwm_location->location ),
-								    'thumb' => nwm_get_thumb( $nwm_location->thumb_id ),
-								    'date' => '',
-								    'arrival' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->arrival ) ),
-								    'departure' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->departure ) ),
-								    'future' => esc_html( $future )
-								   );			   
+				$post_data = array( 
+					'nwm_id'    => (int) $nwm_location->nwm_id,
+					'content'   => $custom_content,
+					'title' 	=> $custom_title,
+					'url' 		=> $custom_url,
+					'location'  => esc_html( $nwm_location->location ),
+					'thumb' 	=> nwm_get_thumb( $nwm_location->thumb_id ),
+					'date' 		=> '',
+					'arrival' 	=> esc_html( nwm_convert_date_format( $date_format, $nwm_location->arrival ) ),
+					'departure' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->departure ) ),
+					'future'    => esc_html( $future )
+				);			   
 								   
 			} else {
 				$publish_date = get_the_time( $date_format, $nwm_location->post_id );
 				$post_data = nwm_collect_post_data( $nwm_location, $publish_date, $future, $date_format );
 			}
 
-			$data = array( 'lat' => $nwm_location->lat,
-						   'lng' => $nwm_location->lng,
-						   'data' => $post_data
-						  );	
+			$data = array( 
+				'lat'  => $nwm_location->lat,
+			    'lng'  => $nwm_location->lng,
+			 	'data' => $post_data
+			);	
 						
 			$json_data .= json_encode( $data ).',' ;
 			
@@ -266,12 +282,23 @@ function nwm_show_full_map( $atts, $content = null ) {
 				$future_index = $i - 1;
 			}
 		}
-	
+			
+		/* 
+		Check if a zoomlevel is set through the shortcode, it has to be between 1 or 12. 
+		Otherwise we use the value set fromo the settings page.
+		*/
+		if ( absint( $zoom ) ) {
+			if ( $zoom >= 1 && $zoom <= 12 ) {
+				$settings['zoom_level'] = $zoom;
+			}
+		}
+				
 		$settings['future_index'] = $future_index; 
 		$settings['zoom_to'] = $zoom_to; 
-		$frontend_data = array( 'location_data' => rtrim( $json_data, "," ), 
-					  		    'settings' => $settings
-					 		   );
+		$frontend_data = array( 
+			'location_data' => rtrim( $json_data, "," ), 
+			'settings' 		=> $settings
+		);
 		
 		/* Calculate the duration of the transient lifetime  */
 		if ( !empty( $first_future_date ) ) {
@@ -283,12 +310,13 @@ function nwm_show_full_map( $atts, $content = null ) {
 					
 			if ( $remaining_time > 0 ) {
 				$transient_lifetime = $remaining_time;
+			} else {
+				$transient_lifetime = '';
 			}
 		}
 						 
 		set_transient( 'nwm_locations_'.$id, $frontend_data, $transient_lifetime ); 
 	}
-
 	/* Load the required front-end scripts and set the js data */
 	nwm_frontend_scripts( $frontend_data );
 		
@@ -299,20 +327,25 @@ function nwm_show_full_map( $atts, $content = null ) {
 	}
 	
 	if ( ( int ) $height ) { 
-		$height = 'style="height:'.$height.'px"';
+		$height = 'style="height:'  .$height . 'px"';
 	} else {
 		$height = '';	
 	}
+	
 	$output = '';
     
 	$output .= '<!-- Nomad World Map - http://nomadworldmap.com -->';
 	$output .= '<div class="nwm-wrap" ' . $width . '>'; 
 	$output .= '<div id="nomad-world-map" ' . $height . '></div>';
-	$output .= '<div id="nwm-destination-list">';	
-	$output .= '<div class="nwm-back nwm-control"></div>';	
-	$output .= '<ul></ul>';	
-	$output .= '<div class="nwm-forward nwm-control"></div>';	
-	$output .= '</div>';	
+	
+	if ( $settings['content_location'] != 'tooltip' ) {
+		$output .= '<div id="nwm-destination-list">';	
+		$output .= '<div class="nwm-back nwm-control"></div>';	
+		$output .= '<ul></ul>';	
+		$output .= '<div class="nwm-forward nwm-control"></div>';	
+		$output .= '</div>';	
+	}
+	
 	$output .= '</div>';	
 
 	return $output;	
@@ -326,17 +359,18 @@ function nwm_collect_post_data( $nwm_location, $publish_date, $future, $date_for
 	$permalink = get_permalink( $nwm_location->post_id );
 	$title = get_the_title( $nwm_location->post_id );
 	
-	$nwm_post_data = array( 'nwm_id' => ( int ) $nwm_location->nwm_id,
-							'thumb' => esc_url( nwm_get_thumb( $nwm_location->thumb_id ) ),
-							'url' => esc_url( $permalink ),
-						    'content' => esc_html( $excerpt ),
-						    'title' => esc_html( $title ),
-						    'location' => esc_html( $nwm_location->location ),
-						    'date' => esc_html( $publish_date ),
-						    'arrival' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->arrival ) ),
-						    'departure' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->departure ) ),
-						    'future' => esc_html( $future )
-						  );
+	$nwm_post_data = array( 
+		'nwm_id'    => ( int ) $nwm_location->nwm_id,
+		'thumb'     => esc_url( nwm_get_thumb( $nwm_location->thumb_id ) ),
+		'url'       => esc_url( $permalink ),
+		'content'   => esc_html( $excerpt ),
+		'title'     => esc_html( $title ),
+		'location'  => esc_html( $nwm_location->location ),
+		'date'      => esc_html( $publish_date ),
+		'arrival'   => esc_html( nwm_convert_date_format( $date_format, $nwm_location->arrival ) ),
+		'departure' => esc_html( nwm_convert_date_format( $date_format, $nwm_location->departure ) ),
+		'future'    => esc_html( $future )
+	  );
 	
 	return $nwm_post_data;
 	
@@ -385,24 +419,27 @@ function nwm_get_post_excerpt ( $post_id ) {
 function nwm_frontend_scripts( $frontend_data ) {
 	
 	wp_enqueue_style( 'nwm', NWM_URL.'css/styles.css', false );
-	wp_enqueue_script( 'nwm-gmap', ( "http://maps.google.com/maps/api/js?sensor=false" ),'' ,'' ,true );
+	wp_enqueue_script( 'nwm-gmap', ( "//maps.google.com/maps/api/js?sensor=false" ),'' ,'' ,true );
 	wp_enqueue_script( 'nwm-gmap3', NWM_URL.'js/gmap3.min.js', array('jquery') ); 	/* the not minified version of gmap3 library is in the js folder -> gmap3.js */
 	wp_enqueue_script( 'nwm-gmap-markers', NWM_URL.'js/nwm-gmap3.js' );
 
 	$params = array(
-		'lines' => $frontend_data['settings']['flightpath'],
-		'curvedLines' => $frontend_data['settings']['curved_lines'],
-		'mapType' => $frontend_data['settings']['map_type'],
-		'thumbCircles' => $frontend_data['settings']['round_thumbs'],
-		'zoomLevel' => $frontend_data['settings']['zoom_level'],
-		'zoomTo' => $frontend_data['settings']['zoom_to'],
-		'pastLineColor' => $frontend_data['settings']['past_color'],
-		'futureLineColor' => $frontend_data['settings']['future_color'],
-		'path' => NWM_URL,
-		'streetView' => $frontend_data['settings']['streetview'],
-		'controlPosition' => $frontend_data['settings']['control_position'],
-		'controlStyle' => $frontend_data['settings']['control_style'],
-		'activeMarker' => $frontend_data['settings']['future_index'],
+		'lines' 		   => $frontend_data['settings']['flightpath'],
+		'curvedLines' 	   => $frontend_data['settings']['curved_lines'],
+		'mapType'		   => $frontend_data['settings']['map_type'],
+		'thumbCircles' 	   => $frontend_data['settings']['round_thumbs'],
+		'zoomLevel' 	   => $frontend_data['settings']['zoom_level'],
+		'zoomTo' 		   => $frontend_data['settings']['zoom_to'],
+		'pastLineColor'    => $frontend_data['settings']['past_color'],
+		'futureLineColor'  => $frontend_data['settings']['future_color'],
+		'path' 			   => NWM_URL,
+		'streetView' 	   => $frontend_data['settings']['streetview'],
+		'controlPosition'  => $frontend_data['settings']['control_position'],
+		'controlStyle' 	   => $frontend_data['settings']['control_style'],
+		'activeMarker' 	   => $frontend_data['settings']['future_index'],
+		'readMore' 		   => $frontend_data['settings']['read_more'],
+		'locationHeader'   => $frontend_data['settings']['location_header'],
+		'contentLocation'  => $frontend_data['settings']['content_location'],
 		'l10n_print_after' => 'nwmDestinations = ' . '[' . $frontend_data['location_data'] . ']'
 	);
 	 

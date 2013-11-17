@@ -1,9 +1,10 @@
 === Nomad World Map ===
 Contributors: tijmensmit
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=NFZ6NCFKXQ8EA
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
-Tested up to: 3.6.1
-Stable tag: 1.1.3
+Tested up to: 3.7.1
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,19 +50,26 @@ Yes, just add the width and height as an attribute to the shortcode. `[nwm_map h
 
 You can add the id attribute to the `[nwm_map id="3"]` shortcode. This will show the map with ID 3 on your page.
 
+= What other shortcode options exist for individual maps? =
+
+You can set the zoom level like this. `[nwm_map id="3" zoom="6"]`
+You can set the content type to either 'tooltip' or 'slider'. `[nwm_map id="3" content="tooltip"]` If it's set to tooltip, it will remove the slider.
+
+If the zoom level or the content type are not set in the shortcode, the values from the general settings page will be used.
+
 = Can I show a list of all the destination on the map? =
 
-Yes, this shortcode `[nwm_list id="1"]` will show the destination list for the map with id 1. If no ID is set, it will default to 1.
+Yes, this short code `[nwm_list id="1"]` will show the destination list for the map with id 1. If no id is set, it will default to 1.
 
 Other shortcode options for the list:
 
-`[nwm_list id="1" dates="all"]` Show both the arrival and departure dates 
-`[nwm_list id="1" dates="arrival"]` Only show the arrival dates 
-`[nwm_list id="1" dates="departure"]` Only show the arrival dates 
+`[nwm_list id="1" dates="all"]` Show both the arrival and departure dates
+`[nwm_list id="1" dates="arrival"]` Only show the arrival dates
+`[nwm_list id="1" dates="departure"]` Only show the arrival dates
 
 = When I search for a blog post title it returns no results? =
 
-Make sure the blog post you search for is published, and that it matches exactly with the title you see in the blog post editor. 
+Make sure the blog post you search for is published, and that it matches exactly with the title you see in the blog post editor.
 Otherwise please open a support request in the support form.
 
 = Where can I suggest new features? =
@@ -77,6 +85,17 @@ You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vot
 
 == Changelog ==
 
+= 1.1.4 =
+* Fixed the map not showing any content when the "On pageload zoom to" setting is set to "The last location before your scheduled route starts", but no previous location exists
+* Fixed the thumbnail not being correctly updated on the map after it was changed in the linked post
+* Fixed the cache not being deleted if a shortcode attribute was changed in a page that contained the nwm_map shortcode
+* Added the option to remove the slider, and show the location content in the tooltip instead
+* Added the option to add a "read more" link after the content
+* Added the option to show the location name in the tooltip / slider content
+* Added support for two new shortcode attributes. You can for individual maps set the zoom level, or define if the content is shown in a tooltip or slider.
+* Added HTTPS support for Google Maps
+* Added support for searching through pages and custom post types, instead of only blog post
+
 = 1.1.3 =
 * Fixed custom thumbnails not showing up for travel dates
 * Fixed a bug where the location thumbnail was shown in a square instead of a circle on the map
@@ -85,23 +104,23 @@ You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vot
 * Changed the css for the generated route list
 
 = 1.1.2 =
-* Fixed changes to the settings not always clearing the map cache correctly. This only happened if the map contained just custom content and travel dates. 
+* Fixed changes to the settings not always clearing the map cache correctly. This only happened if the map contained just custom content and travel dates.
 
 = 1.1.1 =
 * Fixed the script that is used to delete the map cache. This script triggered a php warning during install.
 
 = 1.1 =
 * Added support for multiple independent maps
-* Added a new shortcode that will show a list of all destinations [nwm_list]
+* Added a new short code that will show a list of all destinations [nwm_list]
 * Added the option to set custom thumbnails for each destination
-* Added the option to set different map types (roadmap, terrain, satellite, hybrib)
+* Added the option to set different map types (roadmap, terrain, satellite, hybrid)
 * Added the option to show either straight or curved lines between the markers on the map
-* Modified the used date format on the front-end, it will now use the date format that is set in WordPress (general settings)
+* Modified the used date format on the front-end, it will now use the date format that is set in WordPress (general settings).
 * Improved the removal of multiple route items
 * Fixed the blog title search breaking with strange characters
 
 = 1.0.4 =
-* Fixed the handling of custom travel dates for php versions lower then 5.3
+* Fixed the handling of custom travel dates for php versions lower than 5.3
 * Changed the shortcode output so that the map can also be placed between content, and doesn't always ends up on top of the content
 
 = 1.0.3 =
@@ -121,4 +140,3 @@ You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vot
 
 = 1.0 =
 * Initial release
-

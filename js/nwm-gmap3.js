@@ -1,6 +1,6 @@
 jQuery(document).ready(function($) {
 	
-if($('#nomad-world-map').length) {
+if ( $('#nomad-world-map').length ) {
 	var zoomControlPosition, zoomControlStyle, zoomTo, mapType,
 		flightPath = [],
 		futureFlightPath = [],
@@ -13,6 +13,11 @@ if($('#nomad-world-map').length) {
 			new google.maps.Point(0,0),
 			new google.maps.Point(8,8)
 		);	
+		
+	/* Check if we need to remove the slider, and show the content in the tooltip instead */
+	if ( nwmSettings.contentLocation == 'tooltip' ) {
+		$(".nwm-wrap").addClass('nwm-no-slider');
+	}
 	
 	/* Set correct postion of the controls */		
 	if ( nwmSettings.controlPosition == 'right' ) {
@@ -31,19 +36,19 @@ if($('#nomad-world-map').length) {
 	/* Set the selected map type */
 	switch( nwmSettings.mapType) {
 		case 'roadmap':
-		  mapType = google.maps.MapTypeId.ROADMAP;
+		  mapType = google.maps.MapTypeId.ROADMAP
 		  break;
 		case 'satellite':
-		  mapType = google.maps.MapTypeId.SATELLITE;
+		  mapType = google.maps.MapTypeId.SATELLITE
 		  break;
 		case 'hybrid':
-		  mapType = google.maps.MapTypeId.HYBRID;
+		  mapType = google.maps.MapTypeId.HYBRID
 		  break;
 		case 'terrain':
-		  mapType = google.maps.MapTypeId.TERRAIN;
+		  mapType = google.maps.MapTypeId.TERRAIN
 		  break;		  
 		default:
-		  mapType = google.maps.MapTypeId.ROADMAP;
+		  mapType = google.maps.MapTypeId.ROADMAP
 	}
 	
 	/* Initialize the map */			
@@ -165,47 +170,83 @@ function addDestination( $this, i, destination, futureLocation ) {
 				},
 			},
 			callback: function( marker ) {
-				var circleClass, thumb, title, $destination;
-
-				if ( nwmSettings.thumbCircles == 1 ) {
-					circleClass = 'nwm-circle';	
-				} else {
-					circleClass = '';	
-				}
+				var markerData = {};
 				
-				if ( destination.data.thumb ) {
-					thumb = '<img class="nwm-thumb ' + circleClass + '" data-src="' + destination.data.thumb + '" src="' + placeholder + '" width="64" height="64" />';
-				} else {
-					thumb = '<div><span class="nwm-thumb ' + circleClass + '" /></span></div>';
-				}
-				
-				/* Check which title structure we should use */
-				title = checkHeaderFormat( destination.data.url, destination.data.title, destination.data.location, futureLocation );
-
-				if ( destination.data.arrival ) {
-					if ( destination.data.departure ) {	
-					$destination = '<li data-id="' + destination.data.nwm_id + '">' + thumb + '<h2>' + title + '</h2><p class="nwm-travel-schedule"><span>' + destination.data.arrival + '</span><span> - ' + destination.data.departure + '</span></p><p>'+ destination.data.content + '</p></li>';
+				if ( !$(".nwm-wrap").hasClass('nwm-no-slider') ) {	
+					var destinationHtml,
+						content = destination.data.content;
+					
+					markerData = getMarkerData( destination, nwmSettings, 'slider' );
+					content = content + markerData.readMore;
+						
+					if ( destination.data.arrival ) {
+						if ( destination.data.departure ) {	
+							destinationHtml = '<li data-id="' + destination.data.nwm_id + '">' + markerData.thumb + '<h2>' + markerData.title + '</h2><p class="nwm-travel-schedule"><span>' + destination.data.arrival + '</span><span> - ' + destination.data.departure + '</span></p><p>' + content + '</p></li>';
+						} else {
+							destinationHtml = '<li data-id="' + destination.data.nwm_id + '">' + markerData.thumb + '<h2>' + markerData.title + '</h2><p class="nwm-travel-schedule"><span>' + destination.data.arrival + '</span></p><p>' + content + '</p></li>';
+						}
 					} else {
-						$destination = '<li data-id="' + destination.data.nwm_id + '">' + thumb + '<h2>' + title + '</h2><p class="nwm-travel-schedule"><span>' + destination.data.arrival + '</span></p><p>'+ destination.data.content + '</p></li>';
+						destinationHtml = '<li data-id="' + destination.data.nwm_id + '">' + markerData.thumb + '<h2>' + markerData.title + '<span>' + destination.data.date + '</span></h2><p>' + content + '</p></li>';
+					}
+															
+					$("#nwm-destination-list ul").append( destinationHtml );
+					
+					/* On mouseover we move the map to the corresponding location */
+					$("#nwm-destination-list li").eq(i).bind( 'mouseover', function( ) {
+						$this.gmap3("get").panTo(marker.position);
+						
+						if ( !$(".marker-" + i + "").length ) {
+							$this.gmap3(
+							  {clear:"overlay"},
+								 {
+									overlay:{  /* Show the overlay with the location name at the marker location */
+										latLng: marker.position,
+										options:{
+									    content: "<div class='marker-style marker-" + i + "'>" + destination.data.location + "</div>",
+										  offset: {
+											x:11,
+											y:-15
+										  }
+										}
+									},
+								});
+							}
+					});
+					
+					/* 
+					Check which marker we need to set active on page load, either the first / last one, 
+					or the one just before the future route starts
+					*/	
+					if ( i == nwmSettings.activeMarker ) {
+						$('#nwm-destination-list li:eq("' + nwmSettings.activeMarker + '")').addClass('nwm-active-destination').mouseover();
+		
+						/* If the active destination contains a span, it means it's a custom / future date and we don't need to load any thumbnails */
+						if ( !$('#nwm-destination-list .nwm-active-destination span.nwm-thumb').length ) {
+							imageLoader();
+						}
+					}
+					
+					/* 
+					This fixes a case where the settings are set to focus on the last marker before the future route starts, 
+					but no previous entry exist before the future route starts. So instead we just focus on the first marker we find (the first future entry). 
+					Not what the user selected, but no other way to fix it?
+					 */
+					if ( ( nwmSettings.activeMarker == -1 ) && ( i == 0 ) ) {
+						$('#nwm-destination-list li:first-child').addClass('nwm-active-destination').mouseover();					
 					}
 				} else {
-					$destination = '<li data-id="' + destination.data.nwm_id + '">' + thumb + '<h2>' + title + '<span>' + destination.data.date + '</span></h2><p>'+ destination.data.content + '</p></li>';
-				}
-														
-				$("#nwm-destination-list ul").append( $destination );
+					if ( i == nwmSettings.activeMarker ) {
+						markerData = getMarkerData( destination, nwmSettings, 'tooltip' );
+						markerContent = '<div class="marker-style marker-' + i + '"><div class="nwm-marker-wrap">' + markerData.thumb + '<div class="marker-txt"><h2>' + markerData.title + '</h2><p>' + markerData.date + markerData.readMore + '</p></div></div></div>';
 				
-				/* On mouseover we move the map to the corresponding location */
-				$("#nwm-destination-list li").eq(i).bind( 'mouseover', function( ) {
-					$this.gmap3("get").panTo(marker.position);
-					
-					if ( !$(".marker-" + i + "").length ) {
+						$this.gmap3("get").panTo( marker.position );					
 						$this.gmap3(
 						  {clear:"overlay"},
 							 {
 								overlay:{  /* Show the overlay with the location name at the marker location */
 									latLng: marker.position,
 									options:{
-									  content: "<div class='marker-style marker-" + i + "'>" + destination.data.location + "</div>",
+									content: markerContent,
 									  offset: {
 										x:11,
 										y:-15
@@ -213,45 +254,35 @@ function addDestination( $this, i, destination, futureLocation ) {
 									}
 								},
 							});
-						}
-				});
-				
-				/* 
-				Check which marker we need to set active on page load, either the first / last one, 
-				or the one just before the future route starts
-				*/				
-				if ( i == nwmSettings.activeMarker ) {
-					$('#nwm-destination-list li:eq("' + nwmSettings.activeMarker + '")').addClass('nwm-active-destination').mouseover();
-					
-					/* If the active destination contains a span, it means it's a custom / future date and we don't need to load any thumbnails */
-					if ( !$('#nwm-destination-list .nwm-active-destination span.nwm-thumb').length ) {
-						imageLoader();
 					}
 				}
 			},
 			events:{
 			  mouseover: function( marker ) {
-				$("#nwm-destination-list li").removeClass(); 
-				$("#nwm-destination-list li").eq(i).addClass('nwm-active-destination');
-				$('#nwm-destination-list .nwm-active-destination img').attr('src', placeholder);
-
-				if ( !$('#nwm-destination-list .nwm-active-destination span.nwm-thumb').length ) {
-					imageLoader();
-				}
-				
-				if ( destination.data.arrival ) {
-					var spanData =  '<span style="display:block;">' + destination.data.arrival + ' - ' + destination.data.departure + '</span>';
+				var markerContent;
+									  
+				if ( !$(".nwm-wrap").hasClass('nwm-no-slider') ) {  
+					$("#nwm-destination-list li").removeClass(); 
+					$("#nwm-destination-list li").eq(i).addClass('nwm-active-destination');
+					$('#nwm-destination-list .nwm-active-destination img').attr( 'src', placeholder );
+	
+					if ( !$('#nwm-destination-list .nwm-active-destination span.nwm-thumb').length ) {
+						imageLoader();
+					}
+										
+					markerContent = "<div class='marker-style marker-" + i + "'>" + destination.data.location + "</div>";
 				} else {
-					var spanData =  '<span style="display:block;">' + destination.data.date + '</span>';
+					markerData = getMarkerData( destination, nwmSettings, 'tooltip' );
+					markerContent = '<div class="marker-style marker-' + i + '"><div class="nwm-marker-wrap">' + markerData.thumb + '<div class="marker-txt"><h2>' + markerData.title + '</h2><p>' + markerData.date + markerData.readMore + '</p></div></div></div>';
 				}
-				
+								
 				$(this).gmap3(
 				  {clear:"overlay"},
 					{
 					  overlay:{
 						latLng: marker.getPosition(),
 						options:{
-						  content:  "<div class='marker-style marker-" + i + "'>" + destination.data.location + "</div>",
+						  content: markerContent,
 						  offset: {
 							x:11,
 							y:-15
@@ -264,6 +295,62 @@ function addDestination( $this, i, destination, futureLocation ) {
 		}
 	});	
 }	
+
+/* Collect the required marker data */
+function getMarkerData( destination, nwmSettings, contentType ) {
+	var contentType, 
+		markerData = {},
+		circleClass = checkCircleClass( nwmSettings.thumbCircles ), 
+		thumbHtml = '', 
+		titleHtml = '',
+		spanDate = '', 
+		readMoreHtml = '';
+				
+	if ( destination.data.arrival ) {
+		spanDate = '<span>' + destination.data.arrival + ' - ' + destination.data.departure + '</span>';
+	} else {
+		spanDate = '<span>' + destination.data.date + '</span>';
+	}
+	
+	/* Check which thumb format to use, and whether we should show the placeholder. */
+	if ( contentType == 'tooltip' ) {
+		if ( destination.data.thumb != null ) {		
+			thumbHtml = '<img class="nwm-thumb nwm-marker-img ' + circleClass + '" src="' + destination.data.thumb + '" width="64" height="64" />';
+		} else {
+			thumbHtml = '';	
+		}
+	} else {
+		if ( destination.data.thumb != null ) {
+			thumbHtml = '<img class="nwm-thumb ' + circleClass + '" data-src="' + destination.data.thumb + '" src="' + placeholder + '" width="64" height="64" />';
+		} else {
+			thumbHtml = '<div><span class="nwm-thumb ' + circleClass + '" /></span></div>';
+		}
+	}
+	
+	titleHtml = checkHeaderFormat( destination.data.url, destination.data.title, destination.data.location );
+	
+	/* Check if we should show the read more link */
+	if ( ( destination.data.url.length > 0 ) && ( nwmSettings.readMore == 1 ) ) {
+		readMoreHtml = '<a class="nwm-read-more" href="' + destination.data.url + '">Read more</a>';
+	}
+	
+	/* Check if we should show the location name under the header */
+	if ( ( destination.data.url.length > 0 ) && ( nwmSettings.locationHeader == 1 ) ) {
+		titleHtml = titleHtml + '<span>' + destination.data.location + '</span>';
+	}	
+	
+	markerData = {
+		circleClass: circleClass,
+		thumb: thumbHtml,
+		date: spanDate,
+		readMore: readMoreHtml,
+		title: titleHtml
+	};
+	
+	return markerData;
+	
+}
+
 
 /* Load the required image for the route location */
 function imageLoader() {
@@ -303,7 +390,7 @@ function imageLoader() {
 
 }
 
-function checkHeaderFormat( markerUrl, markerTitle, destination, futureLocation ) {
+function checkHeaderFormat( markerUrl, markerTitle, destination ) {
 	var title;
 	
 	if ( markerUrl ) {
@@ -317,6 +404,18 @@ function checkHeaderFormat( markerUrl, markerTitle, destination, futureLocation 
 	}	
 	
 	return title;
+}
+
+function checkCircleClass( thumbCircles ) {
+	var circleClass;
+	
+	if ( thumbCircles == 1 ) {
+		circleClass = 'nwm-circle';	
+	} else {
+		circleClass = '';	
+	}		
+
+	return circleClass;
 }
 			
 $(".nwm-forward").on( 'click', function () {

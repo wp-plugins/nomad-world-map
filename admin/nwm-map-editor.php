@@ -44,15 +44,15 @@ function nwm_map_editor() {
                     <div id="nwm-marker-content">
                         <p class="nwm-marker-wrap"><label for="nwm-marker-content-option"><?php _e( 'Location content:', 'nwm' ); ?></label> 
                            <select id="nwm-marker-content-option">
-                                <option selected="selected" value="nwm-blog-excerpt"><?php _e( 'Blog post excerpt', 'nwm' ); ?></option> 
+                                <option selected="selected" value="nwm-blog-excerpt"><?php _e( 'Post excerpt', 'nwm' ); ?></option> 
                                 <option value="nwm-custom-text"><?php _e( 'Custom content', 'nwm' ); ?></option> 
                                 <option value="nwm-travel-schedule"><?php _e( 'Travel schedule', 'nwm' ); ?></option> 
                            </select>
                         </p>
                         <div id="nwm-blog-excerpt" class="nwm-blog-title nwm-marker-option">
-                            <label for="nwm-post-title"><?php _e( 'Title of the blog post you want to link to:', 'nwm' ); ?></label> 
+                            <label for="nwm-post-title"><?php _e( 'Title of the post you want to link to:', 'nwm' ); ?></label> 
                             <input id="nwm-post-title" type="text" class="textinput"> <input id="find-nwm-title" class="button-primary" type="button" name="text" value="Search" />
-                            <div id="nwm-search-link"><?php _e( 'Linked post: ', 'nwm' ); ?><span></span></div>
+                            <div id="nwm-search-link"><?php _e( 'Link: ', 'nwm' ); ?><span></span></div>
                              <input id="nwm-search-nonce" type="hidden" value="<?php echo wp_create_nonce('nwm_nonce_search'); ?>"  />
                         </div>
                         
@@ -91,7 +91,7 @@ function nwm_map_editor() {
                             <input type="hidden" name="till_date" />
                         </div>
                     </div>
-                    <p class="nwm-date-desc"><em class="nwm-desc"><?php _e( 'If no dates are set, then the publish date of the linked blog post is shown as the travel date.', 'nwm' ); ?></em></p>
+                    <p class="nwm-date-desc"><em class="nwm-desc"><?php _e( 'If no dates are set, then the publish date of the linked post is shown as the travel date.', 'nwm' ); ?></em></p>
                     <p><input id="nwm-add-trip" type="submit" name="nwm-add-trip" class="button-primary" value="Save" /></p>
                     <input id="nwm-post-id" type="hidden" name="nwm-post-id" value="" />
                     <input id="nwm-post-type" type="hidden" name="nwm-post-type" value="" />

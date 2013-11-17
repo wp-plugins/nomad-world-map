@@ -99,6 +99,32 @@ function nwm_version_updates() {
 		nwm_delete_all_transients();
 	}
 	
+	if ( version_compare( $current_version, '1.1.4', '<' ) ) {
+		$settings = get_option( 'nwm_settings' );	
+		
+		if ( is_array( $settings ) ) {
+			/* Add the read more option to the map settings */
+			if ( empty( $settings['read_more'] ) ) {
+				$settings['read_more'] = 0;
+				update_option( 'nwm_settings', $settings );
+			}
+			
+			/* Add the content location option to the map settings */
+			if ( empty( $settings['content_location'] ) ) {
+				$settings['content_location'] = 'slider';
+				update_option( 'nwm_settings', $settings );
+			}	
+			
+			/* Add the location header option to the map settings */
+			if ( empty( $settings['location_header'] ) ) {
+				$settings['location_header'] = '0';
+				update_option( 'nwm_settings', $settings );
+			}				
+		}
+		
+		nwm_delete_all_transients();
+	}
+	
 	update_option( 'nwm_version', NWN_VERSION_NUM );
 }
 

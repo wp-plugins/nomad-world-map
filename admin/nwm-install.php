@@ -18,7 +18,10 @@ function nwm_default_settings() {
 			'future_color' => '#001d70',
 			'streetview' => '0',
 			'control_position' => 'left',
-			'control_style' => 'small'
+			'control_style' => 'small',
+			'read_more' => '0',
+			'content_location' => 'slider',
+			'location_header' => '0'
 		);
 			
 		update_option( 'nwm_settings', $settings );

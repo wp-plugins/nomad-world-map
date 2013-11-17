@@ -71,12 +71,13 @@ function nwm_save_location() {
 			nwm_update_option_value( 'nwm_post_ids', $map_id, $last_post_id );
 		}
 		
-		$response = array( 'success' => true,
-						   'id' => $last_id, 
-						   'delete_nonce' => wp_create_nonce( 'nwm_nonce_delete_'.$last_id ), 
-						   'update_nonce' => wp_create_nonce( 'nwm_nonce_update_'.$last_id ),
-						   'load_nonce' => wp_create_nonce( 'nwm_nonce_load_'.$last_id )
-						  );
+		$response = array( 
+		   'success' 	  => true,
+		   'id' 		  => $last_id, 
+		   'delete_nonce' => wp_create_nonce( 'nwm_nonce_delete_'.$last_id ), 
+		   'update_nonce' => wp_create_nonce( 'nwm_nonce_update_'.$last_id ),
+		   'load_nonce'   => wp_create_nonce( 'nwm_nonce_load_'.$last_id )
+		);
 		
 		nwm_delete_transients( $map_id );
 		wp_send_json( $response );
@@ -583,19 +584,31 @@ function nwm_find_post_title() {
 	if ( !current_user_can( 'manage_options' ) )
 		die( '-1' );
 	check_ajax_referer( 'nwm_nonce_search' );
-							
+	
+	/* Check if there are any custom post types we should include in the searched posted types */
+	$post_types = array( 'post', 'page' );
+	$custom_types = get_post_types( $args = array( "public" => true, "_builtin" => false ), 'names' ); 
+		
+	if ( ( is_array( $custom_types ) ) && ( !empty( $custom_types ) ) ) {
+		foreach ( $custom_types as $custom_type ) {
+		   $post_types[] = $custom_type;
+		}
+	}
+	
+	$post = implode( "', '", $post_types );
+
 	$result = $wpdb->get_results( 
-			  		$wpdb->prepare(
-							"
-							SELECT id, post_title 
-							FROM $wpdb->posts
-							WHERE post_status = 'publish' 
-							AND post_type = 'post'
-							AND post_title = %s
-							", 
-							stripslashes( $_POST['post_title'] )
-					 ), OBJECT
-			   );	  
+				$wpdb->prepare(
+						"
+						SELECT id, post_title 
+						FROM $wpdb->posts
+						WHERE post_type IN ('$post')
+						AND post_status = 'publish' 
+						AND post_title = %s
+						", 
+						stripslashes( $_POST['post_title'] )
+				 ), OBJECT
+		   );			   
 		
 	if ( $result === false ) {
 		wp_send_json_error();
@@ -810,29 +823,71 @@ function nwm_check_latlng( $latlng ) {
 }
 
 /* 
-When a post is saved, check if the post_id is used on the map.
-If so we delete the transient, this forces the cache to be rebuild and makes sure we show the correct post data.
+When a post is saved, check if the post_id is used on the map. Or if the page content contains the map shortcode.
+In both cases we need to delete the map transient, this forces the cache to be rebuild and makes sure we show the correct data.
 */
 function nwm_check_used_id( $post_id ) {
 	
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
 		return;
+
+	if ( !current_user_can( 'edit_post', $post_id ) )
+		return;
+
+	if ( ( 'page' == $_POST['post_type'] ) || ( 'post' == $_POST['post_type'] ) )  {	
 	
-	if ( 'post' == $_POST['post_type'] ) {
-		if ( !current_user_can( 'edit_post', $post_id ) )
-			return;
+		/* Check if the nwm_map shortcode exists in the posted content  */
+		if ( preg_match_all( '/\[nwm_map(.+?)?\]/', stripslashes( $_POST['post_content'] ), $matches ) ) {
+			
+			/* Check if the shortcode contains the id attribute */ 
+			if ( strpos( $matches[0][0], 'id=' ) !== false ) {
+				$shortcode_attributes = explode( " ", trim( $matches[1][0] ) );
 				
+				/* Loop over all the shortcode attributes, and take out the id value */
+				foreach ( $shortcode_attributes as $attributes ) {
+					list( $opt, $val ) = explode( "=", $attributes );
+					
+					if ( $opt == 'id' ) {
+						$map_id = trim( $val, '"' );
+						break;
+					}
+				}
+			}
+			
+			/* If no id exists, or the id contains a non-int, we set it to the id of the default map  */			
+			if ( !absint( $map_id ) ) {
+				$map_id = 1;	
+			}
+			
+			nwm_delete_transients( $map_id );
+		}	
+
+		/* 
+		Get all the post ids that are used on the map, and check for a match with the posted post_id
+		If a match is found we delete the transient and update the thumb id.
+		*/		
 		if ( $nwm_post_ids = get_option( 'nwm_post_ids' ) ) {			
 			foreach ( $nwm_post_ids as $map_id => $used_post_ids )	{
 				$used_post_ids = explode( ',', $used_post_ids );
 				
 				if ( in_array( $post_id, $used_post_ids ) ) {
 					nwm_delete_transients( $map_id );
+					nwm_update_thumb_id( $post_id );
 				}
 			}
 		} 
 	}
 	
+}
+
+/* Update the thumb id value */
+function nwm_update_thumb_id( $post_id ) {
+
+	global $wpdb;
+	
+	$thumb_id = get_post_thumbnail_id( $post_id );
+	$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->nwm_routes SET thumb_id = %d WHERE post_id = %d", $thumb_id, $post_id ) );
+		
 }
 
 /* 
@@ -881,10 +936,10 @@ function nwm_admin_scripts() {
 	wp_enqueue_script( 'jquery-ui-sortable' );
 	wp_enqueue_script( 'jquery-ui-datepicker' );
 	wp_enqueue_script( 'jquery-ui-dialog' );
-	wp_enqueue_style( 'jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.css' );
+	wp_enqueue_style( 'jquery-style', '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.css' );
 	wp_enqueue_script( 'json2' );
 	wp_enqueue_style( 'nwm-admin-css', plugins_url( '/css/style.css', __FILE__ ), false );
-	wp_enqueue_script( 'nwm-gmap', ( "http://maps.google.com/maps/api/js?sensor=false" ), false );
+	wp_enqueue_script( 'nwm-gmap', ( "//maps.google.com/maps/api/js?sensor=false" ), false );
 	wp_enqueue_script( 'nwm-admin-js', plugins_url( '/js/nwm-admin.js', __FILE__ ), array('jquery', 'wp-color-picker'), false );
 	wp_enqueue_script( 'jquery-queue', plugins_url( '/js/ajax-queue.js', __FILE__ ), array('jquery'), false );
 	
