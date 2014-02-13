@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 /* Manage and create multiple maps that can be used in the editor */
 function nwm_manage_maps() {
 	
-	$nwm_map_ids = get_option( 'nwm_map_ids' );
+	$nwm_map_ids     = get_option( 'nwm_map_ids' );
 	$nwm_route_order = get_option( 'nwm_route_order' );
-	$msg_type = 'success';
+	$msg_type        = 'success';
 	?>
     
     <div id="nwm-wrap" class="wrap">

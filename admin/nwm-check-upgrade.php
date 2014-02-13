@@ -21,6 +21,7 @@ function nwm_version_updates() {
 	if ( version_compare( $current_version, '1.1', '<' ) ) {
 		
 		global $wpdb;
+        
 		$charset_collate = '';
 	
 		if ( !empty( $wpdb->charset ) )
@@ -45,9 +46,9 @@ function nwm_version_updates() {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta($sql);
 		
-		$settings = get_option( 'nwm_settings' );	
+		$settings    = get_option( 'nwm_settings' );	
 		$route_order = get_option( 'nwm_route_order' );
-		$post_ids = get_option( 'nwm_post_ids' );
+		$post_ids    = get_option( 'nwm_post_ids' );
 			
 		if ( is_array( $settings ) ) {
 			/* Add the curved line option to the map settings */
@@ -81,9 +82,10 @@ function nwm_version_updates() {
 					$thumb_id = get_post_thumbnail_id( $post_id );
 					
 					if ( !empty( $thumb_id ) ) {
-						$thumb_ids[] = array( 'post_id' => $post_id, 
-											  'thumb_id' => $thumb_id 
-											 );
+						$thumb_ids[] = array( 
+                            'post_id' => $post_id, 
+                            'thumb_id' => $thumb_id 
+                           );
 					}
 				}
 				
@@ -124,6 +126,56 @@ function nwm_version_updates() {
 		
 		nwm_delete_all_transients();
 	}
+    
+    if ( version_compare( $current_version, '1.2', '<' ) ) {
+        
+       	global $wpdb;
+        
+		$charset_collate = '';
+	
+		if ( !empty( $wpdb->charset ) )
+			$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
+		if ( !empty( $wpdb->collate ) )
+			$charset_collate .= " COLLATE $wpdb->collate";	
+			
+		/* Add the country_code field to the table */
+		$sql = "CREATE TABLE " . $wpdb->nwm_routes . " (
+							 nwm_id int(10) unsigned NOT NULL auto_increment,
+							 post_id bigint(20) unsigned NOT NULL,
+							 thumb_id bigint(20) unsigned NOT NULL,
+							 schedule tinyint(1) NOT NULL,
+							 lat float(10,6) NOT NULL,
+							 lng float(10,6) NOT NULL,
+							 location varchar(255) NOT NULL,
+                             iso2_country_code char(2) NULL,
+							 arrival datetime NULL default '0000-00-00 00:00:00',
+							 departure datetime NULL default '0000-00-00 00:00:00',
+				PRIMARY KEY (nwm_id)
+							 ) $charset_collate;";
+							 
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta($sql); 
+        
+        /* Add the read more field to the options */
+        $settings = get_option( 'nwm_settings' );	
+        
+        if ( is_array( $settings ) ) {
+            /* Add the default read more label to the map settings */
+            if ( empty( $settings['read_more_label'] ) ) {
+                $settings['read_more_label'] = 'Read more';
+                update_option( 'nwm_settings', $settings );
+            }
+            
+            if ( empty( $settings['latlng_input'] ) ) {
+                $settings['latlng_input'] = '0';
+                update_option( 'nwm_settings', $settings );
+            }  
+        }
+        
+        /* Make sure all country codes exist */
+        nwm_check_country_codes();
+        
+    }
 	
 	update_option( 'nwm_version', NWN_VERSION_NUM );
 }

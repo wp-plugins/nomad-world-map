@@ -17,7 +17,6 @@ function nwm_settings_page() {
                 <div class="postbox-container">
                     <div class="metabox-holder">
                         <div class="postbox">
-                            <div title="Click to toggle" class="handlediv"><br></div>
                             <h3 class="hndle"><span><?php _e( 'General', 'nwm' ); ?></span></h3>
                             <div class="inside">
                                 <p>
@@ -54,7 +53,6 @@ function nwm_settings_page() {
                     
                     <div class="metabox-holder">
                         <div class="postbox">
-                            <div title="Click to toggle" class="handlediv"><br></div>
                             <h3 class="hndle"><span><?php _e( 'Content Options', 'nwm' ); ?></span></h3>
                             <div class="inside">
                                 <p>
@@ -64,6 +62,10 @@ function nwm_settings_page() {
                                 <p>
                                    <label for="nwm-readmore"><?php _e( 'Include a "read more" link for blog post?', 'nwm' ); ?></label> 
                                    <input id="nwm-readmore" type="checkbox" name="nwm-readmore" value="" <?php checked( $options['read_more'] == '1', true ); ?> />
+                                </p>
+                                <p id="nwm-custom-readmore" <?php if ( $options['read_more'] == '0' ) { echo 'style="display:none;"'; }; ?>>
+                                   <label for="nwm-readmore-label"><?php _e( 'Read more label', 'nwm' ); ?></label> 
+                                   <input id="nwm-readmore-label" type="text" name="nwm-readmore-label" value="<?php echo esc_attr( stripslashes( $options['read_more_label'] ) ); ?>" />
                                 </p> 
                                 <p>
                                     <label><?php _e( 'Show the location content in the:', 'nwm' ); ?></label>
@@ -84,12 +86,23 @@ function nwm_settings_page() {
                     
                     <div class="metabox-holder">
                         <div class="postbox">
-                            <div title="Click to toggle" class="handlediv"><br></div>
+                            <h3 class="hndle"><span><?php _e( 'Route Editor Options', 'nwm' ); ?></span></h3>
+                            <div class="inside">
+                                <p>
+                                   <label for="nwm-latlng-input"><?php _e( 'Show the coordinates input field', 'nwm' ); ?></label> 
+                                   <input id="nwm-latlng-input" type="checkbox" name="nwm-latlng-input" value="" <?php checked( $options['latlng_input'] == '1', true ); ?> />
+                                </p>  
+                            </div>        
+                        </div>   
+                    </div>
+                    
+                    <div class="metabox-holder">
+                        <div class="postbox">
                             <h3 class="hndle"><span><?php _e( 'Map Controls', 'nwm' ); ?></span></h3>
                             <div class="inside">
                                 <p>
                                    <label for="nwm-streetview"><?php _e( 'Show the street view controls?', 'nwm' ); ?></label> 
-                                   <input id="nwm-streeview" type="checkbox" name="nwm-streetview" value="" <?php checked( $options['streetview'] == '1', true ); ?> />
+                                   <input id="nwm-streetview" type="checkbox" name="nwm-streetview" value="" <?php checked( $options['streetview'] == '1', true ); ?> />
                                 </p> 
                                 <p>
                                     <label><?php _e( 'Position of the map controls', 'nwm' ); ?></label>
@@ -117,7 +130,6 @@ function nwm_settings_page() {
                 <div class="postbox-container side">
                 	<div class="metabox-holder">
                         <div class="postbox">
-                            <div title="Click to toggle" class="handlediv"><br></div>
                             <h3 class="hndle"><span><?php _e( 'About', 'nwm' ); ?></span><span style="float:right;">Version <?php echo NWN_VERSION_NUM; ?></span></h3>
                             <div class="inside">
                                 <p><strong>Nomad World Map</strong> by <a href="http://twitter.com/tijmensmit">Tijmen Smit</a>.</p>
@@ -140,8 +152,17 @@ function nwm_settings_page() {
 function nwm_settings_check() {
 	
 	$output = array();
-	$zoom_options = array( 'first', 'schedule_start', 'last' );
-	$map_types = array( 'roadmap', 'satellite', 'hybrid', 'terrain' );
+	$zoom_options = array( 
+        'first', 
+        'schedule_start', 
+        'last' 
+    );
+	$map_types = array( 
+        'roadmap', 
+        'satellite', 
+        'hybrid', 
+        'terrain' 
+    );
 		
 	/* Check if we have a valid zoom-to option, otherwise set it to last */
 	if ( in_array( $_POST['nwm-zoom-to'], $zoom_options ) ) {
@@ -164,18 +185,20 @@ function nwm_settings_check() {
 		$output['zoom_level'] = 3;	
 	}	
 
-	$output['flightpath'] = isset( $_POST['nwm-flightpath'] ) ? 1 : 0;
-	$output['curved_lines'] = isset( $_POST['nwm-curved-lines'] ) ? 1 : 0;		
-	$output['round_thumbs'] = isset( $_POST['nwm-round-thumbs'] ) ? 1 : 0;	
-	$output['past_color'] = sanitize_text_field( $_POST['nwm-past-color'] );
-	$output['future_color'] = sanitize_text_field( $_POST['nwm-future-color'] );
-	$output['streetview'] = isset( $_POST['nwm-streetview'] ) ? 1 : 0;	
+	$output['flightpath']       = isset( $_POST['nwm-flightpath'] ) ? 1 : 0;
+	$output['curved_lines']     = isset( $_POST['nwm-curved-lines'] ) ? 1 : 0;		
+	$output['round_thumbs']     = isset( $_POST['nwm-round-thumbs'] ) ? 1 : 0;	
+	$output['past_color']       = sanitize_text_field( $_POST['nwm-past-color'] );
+	$output['future_color']     = sanitize_text_field( $_POST['nwm-future-color'] );
+	$output['streetview']       = isset( $_POST['nwm-streetview'] ) ? 1 : 0;	
 	$output['control_position'] = ( wp_filter_nohtml_kses( $_POST['nwm-control-position']  == 'left') ) ? 'left' : 'right';	
-	$output['control_style'] = ( wp_filter_nohtml_kses( $_POST['nwm-control-style'] == 'small' ) ) ? 'small' : 'large';
-	$output['read_more'] = isset( $_POST['nwm-readmore'] ) ? 1 : 0;
-	$output['location_header'] = isset( $_POST['nwm-location-header'] ) ? 1 : 0;
+	$output['control_style']    = ( wp_filter_nohtml_kses( $_POST['nwm-control-style'] == 'small' ) ) ? 'small' : 'large';
+	$output['read_more']        = isset( $_POST['nwm-readmore'] ) ? 1 : 0;
+    $output['read_more_label']  = sanitize_text_field( $_POST['nwm-readmore-label'] ); 
+	$output['location_header']  = isset( $_POST['nwm-location-header'] ) ? 1 : 0;
 	$output['content_location'] = ( wp_filter_nohtml_kses( $_POST['nwm-content-location'] == 'slider') ) ? 'slider' : 'tooltip';
-	
+	$output['latlng_input']     = isset( $_POST['nwm-latlng-input'] ) ? 1 : 0;
+    
 	nwm_delete_all_transients();
 	
 	return $output;
@@ -185,10 +208,11 @@ function nwm_settings_check() {
 /* Create the dropdown to select which marker is active when the page first loads */
 function nwm_zoom_to( $options ) {
 	
-	$items = array( 'first' => 'The first location (default)', 
-				    'schedule_start' => 'The last location before your scheduled route starts',
-				    'last' => 'The last location',
-				   );
+	$items = array( 
+        'first'          => 'The first location (default)', 
+        'schedule_start' => 'The last location before your scheduled route starts',
+        'last'           => 'The last location',
+       );
 				   
 	$dropdown = '<select id="nwm-zoom-to" name="nwm-zoom-to">';
 	
@@ -206,7 +230,12 @@ function nwm_zoom_to( $options ) {
 /* Create the dropdown for the different map types */
 function nwm_map_types( $options ) {
 	
-	$items = array( 'roadmap', 'satellite', 'hybrid', 'terrain' );
+	$items = array( 
+        'roadmap', 
+        'satellite', 
+        'hybrid', 
+        'terrain' 
+    );
 	$dropdown = '<select id="nwm-map-type" name="nwm-map-type">';
 	
 	foreach ( $items as $item => $value ) {

@@ -184,28 +184,37 @@
 	border-top:1px dotted #ccc;
 }
 #nwm-destination-list td.nwm-order span {
-	float:left; 
-	color:#000; 
-	font-weight:bold; 
-	text-align:center;
+    float:left; 
+    color:#000; 
+    font-weight:bold; 
+    text-align:center;
 }
 #nwm-destination-list tbody tr:hover {
-	background-color:#fcfcfc; 
-	cursor:move;
+    background-color:#fcfcfc; 
+    cursor:move;
 }
 #nwm-destination-list th, 
 #nwm-destination-list td {
-	padding:10px;
-	text-align:left;  
-	line-height:auto;
+    padding:10px;
+    text-align:left;  
+    line-height:auto;
+}
+
+#nwm-destination-list .nwm-arrival span,
+#nwm-destination-list .nwm-departure span {
+    white-space:nowrap;
+}
+
+#nwm-wrap .nwm-location img {
+    margin-right: 5px;
 }
 
 .nwm-url a {
-	display:block;
-	height:16px;
-	height:16px;
-	text-indent:-9999px; 
-	background:url('../img/url.png') left top no-repeat;
+    display:block;
+    height:16px;
+    height:16px;
+    text-indent:-9999px; 
+    background:url('../img/url.png') left top no-repeat;
 }
 
 .nwm-blog-title {
@@ -255,27 +264,27 @@
 
 /* Thumbnails */
 #nwm-thumb-wrap { 	
-	float:left; 
-	width:100%; 
-	margin-bottom:12px;
+    float:left; 
+    width:100%; 
+    margin-bottom:12px;
 }
 
 .nwm-thumb, 
 .nwm-circle {
-	float:left;
-	border-radius:33px;	
-	width:64px; 
-	height:64px;
-	margin:10px 15px 10px 0; 
+    float:left;
+    border-radius:33px;	
+    width:64px; 
+    height:64px;
+    margin:10px 15px 10px 0; 
 }
 
 .nwm-thumb {
-	background:#EBEBEB url(../../img/graphic.png) -23px 0 no-repeat;
+    background:#EBEBEB url(../../img/graphic.png) -23px 0 no-repeat;
 }
 
 #nwm-thumb-wrap .button-primary {
-	float:left; 
-	margin-right:10px;
+    float:left; 
+    margin-right:10px;
 }
 #nwm-thumb-wrap div {float:left; width:100%; clear:both;}
 #nwm-thumb-wrap strong {display:block;}
@@ -414,9 +423,17 @@
 #nwm-settings-form .postbox-container .postbox {
     float: left;
     width:100%;
-	
 }
 
+/* Latlng input fields */
+#nwm-latlng-label {
+    margin-top:10px !important;
+}
+.nwm-latlng-input #gmap-nwm {
+    height:587px;
+}
+
+/* Faq */
 #nwm-faq dt {
 	margin-bottom:4px;
 	font-weight:bold;
@@ -429,6 +446,16 @@
 
 #nwm-faq dl {
 	margin-bottom: 17px;	
+}
+
+/* Widget */
+#widgets-right .nwm-widget-labels {
+    margin-top:10px;
+}
+
+#widgets-right .nwm-widget-labels label {
+    display: block;
+    margin-bottom: 5px;
 }
 
 @media screen and (max-width: 840px) {

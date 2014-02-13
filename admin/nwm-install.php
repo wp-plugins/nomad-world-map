@@ -8,20 +8,22 @@ function nwm_default_settings() {
 	
 	if ( !$settings_check ) {
 		$settings = array(
-			'flightpath' => 1,
-			'curved_lines' => 0,
-			'map_type' => 'roadmap',
-			'round_thumbs' => 1,
-			'zoom_to' => 'first',
-			'zoom_level' => '3',
-			'past_color' => '#ad1700',
-			'future_color' => '#001d70',
-			'streetview' => '0',
+			'flightpath'       => '1',
+			'curved_lines'     => '0',
+			'map_type'         => 'roadmap',
+			'round_thumbs'     => '1',
+			'zoom_to'          => 'first',
+			'zoom_level'       => '3',
+			'past_color'       => '#ad1700',
+			'future_color'     => '#001d70',
+			'streetview'       => '0',
 			'control_position' => 'left',
-			'control_style' => 'small',
-			'read_more' => '0',
+			'control_style'    => 'small',
+			'read_more'        => '0',
 			'content_location' => 'slider',
-			'location_header' => '0'
+			'location_header'  => '0',
+            'read_more_label'  => 'Read more',
+            'latlng_input'     => '0'
 		);
 			
 		update_option( 'nwm_settings', $settings );
@@ -56,6 +58,7 @@ function nwm_create_tables() {
 							 lat float(10,6) NOT NULL,
 							 lng float(10,6) NOT NULL,
 							 location varchar(255) NOT NULL,
+                             iso2_country_code char(2) NOT NULL,
 							 arrival datetime NULL default '0000-00-00 00:00:00',
 							 departure datetime NULL default '0000-00-00 00:00:00',
 				PRIMARY KEY (nwm_id)

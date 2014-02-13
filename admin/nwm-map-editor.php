@@ -3,13 +3,20 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 /* Build the edit page with the map and show a list of the existing routes */
 function nwm_map_editor() {
-	$nwm_map_ids = get_option( 'nwm_map_ids' );
+	$nwm_map_ids            = get_option( 'nwm_map_ids' );
 	$collected_destinations = nwm_map_editor_data( $nwm_map_id = 1 ); // 1 is the id of the default map					
-	$nwm_route_order = get_option( 'nwm_route_order' );	
-	$option_values = get_option( 'nwm_post_ids' );
+	$nwm_route_order        = get_option( 'nwm_route_order' );	
+	$option_values          = get_option( 'nwm_post_ids' );
+    $options                = get_option( 'nwm_settings' );
+    
+    if ( $options['latlng_input'] ) {
+        $extra_class = 'nwm-latlng-input';
+    } else {
+        $extra_class = '';
+    }
 	?>
     
-    <div id="nwm-wrap" class="wrap">
+    <div id="nwm-wrap" class="wrap <?php echo $extra_class; ?>">
         <h2>Nomad World Map</h2>
 		
         <div class="nwn-new-destination-wrap">
@@ -36,9 +43,25 @@ function nwm_map_editor() {
                 <form id="nwm-form">
                     <p><label for="nwm-searched-location"><?php _e( 'City / Country:', 'nwm' ); ?></label> 
                        <input id="nwm-searched-location" class="textinput" type="text" name="nwm-searched-location" value="" />
-                       <input id="find-nwm-location" class="button-primary" type="button" name="text" value="Set" />
-                       <input id="nwm-latlng" type="hidden" name="nwm-latlng" value="" />
+                       <input id="find-nwm-location" class="button-primary" type="button" name="text" value="<?php _e( 'Set', 'nwm' ); ?>" />
                        <em class="nwm-desc"><?php _e( 'You can drag the red marker to a specific location', 'nwm' ); ?></em>
+
+                        <?php 
+                            if ( $options['latlng_input'] ) {
+                            ?>
+                               <label id='nwm-latlng-label' for='nwm-latlng'><?php _e( 'Coordinates:', 'nwm' ); ?></label>
+                               <input id="nwm-latlng" class="textinput" type="text" name="nwm-latlng" value="" />
+                               <input id="preview-nwm-latlng" class="button-primary" type="button" name="text" value="<?php _e( 'Preview', 'nwm' ); ?>" />
+                            <?php
+                            } else {
+                            ?>    
+                                <input id="nwm-latlng" type="hidden" name="nwm-latlng" value="" />
+                            <?php
+                            }
+                        ?>
+                       
+                       <input id="nwm-latlng" type="hidden" name="nwm-latlng" value="" />
+                       <input id="nwm-country-code" type="hidden" name="nwm-country-code" value="" />
                     </p>
                     
                     <div id="nwm-marker-content">
@@ -113,7 +136,6 @@ function nwm_map_editor() {
                  </select>
               </p>
            </div>
-                    
         </div>
             <div class="gmap-wrap">
             	<div id="gmap-nwm"></div>
@@ -187,10 +209,22 @@ function nwm_build_tr_list( $collected_destinations ) {
 		} else {
 			$thumb = '';	
 		}
-								
-		$output .= '<tr '. $travel_schedule .' data-nwm-id="'. esc_attr( $nwm_location['data']['nwm_id'] ) . '" data-latlng="' . esc_attr( $nwm_location['lat'] ) . ',' . esc_attr( $nwm_location['lng'] ) . '" data-post-id="'. esc_attr( $nwm_location['data']['post_id'] ) .'">'."\n"; 	
+        
+        if ( $nwm_location['data']['country_code'] ) {
+            $flag_url = '<img src="' . NWM_URL . 'img/flags/' . strtolower( esc_attr( $nwm_location['data']['country_code'] ) ) . '.png" />'; 
+        } else {
+            /* If we don't have a county code yet, try to get one */
+            $response = nwm_geocode_location( $nwm_location['data']['location'] );
+            nwm_update_country_code( $response['country_code']['short_name'], $nwm_location['data']['nwm_id'] );
+            $flag_url = '<img src="' . NWM_URL . 'img/flags/' . strtolower( esc_attr( $response['country_code']['short_name'] ) ) . '.png" />'; 
+        }
+        
+        /* Select the correct country code */
+        $country_code = ( $nwm_location['data']['country_code'] ) ? $nwm_location['data']['country_code'] : $response['country_code']['short_name'];
+        
+		$output .= '<tr '. $travel_schedule .' data-nwm-id="'. esc_attr( $nwm_location['data']['nwm_id'] ) . '"data-country="' . esc_attr( $country_code ) . '" data-latlng="' . esc_attr( $nwm_location['lat'] ) . ',' . esc_attr( $nwm_location['lng'] ) . '" data-post-id="'. esc_attr( $nwm_location['data']['post_id'] ) .'">'."\n"; 	
 		$output .= '<td class="nwm-order"><span>' . $i .'</span></td>'."\n";
-		$output .= '<td class="nwm-location">'. esc_html( $nwm_location['data']['location'] ) .'</td>'."\n";
+		$output .= '<td class="nwm-location">' . $flag_url . ' ' .  esc_html( $nwm_location['data']['location'] ) .'</td>'."\n";
 		$output .= '<td class="nwm-url">'. $url .'</td>'."\n";
 		$output .= '<td class="nwm-arrival">'. $arrival_date .' <span>'. esc_html( $nwm_location['data']['arrival_formated'] ) .'</span></td>'."\n";
 		$output .= '<td class="nwm-departure">'. $departure_date .' <span>'. esc_html( $nwm_location['data']['departure_formated'] ) .'</span></td>'."\n";	
