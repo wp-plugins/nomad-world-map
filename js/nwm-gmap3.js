@@ -1,7 +1,7 @@
 jQuery( document ).ready( function( $ ) {
 
 if ( $( "#nwm-map-0" ).length ) {
-	$( ".nwm-wrap" ).eq(0).parent().attr( "id", "nwm-outer" );
+	$( ".nwm-wrap" ).eq(0).parent().wrap( "<div id='nwm-outer'>", "</div>" );
 }
 
 var flightPath = [],
@@ -438,7 +438,7 @@ function getMarkerData( destination, nwmSettings, contentType ) {
 			readMoreLabel = "Read more";
 		}
 		
-		readMoreHtml = "<a class='nwm-read-more' href=" + destination.data.url + ">" + readMoreLabel + "</a>";
+		readMoreHtml = "<a class='nwm-read-more' href='" + destination.data.url + "'>" + readMoreLabel + "</a>";
 	}
 	
 	/* Check if we should show the location name under the header */
@@ -515,7 +515,7 @@ function checkHeaderFormat( markerUrl, markerTitle, destination ) {
 	var title;
 
 	if ( markerUrl ) {
-		title = "<a href=" + markerUrl + ">" + markerTitle + "</a>";
+		title = "<a href='" + markerUrl + "'>" + markerTitle + "</a>";
 	} else {
 		if ( markerTitle ) {
 			title = markerTitle;
