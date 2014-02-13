@@ -24,3 +24,12 @@
 #nwm-destination-wrap .nwm-active {
     padding-bottom:0 !important;
 }
+
+#nwm-widget-description textarea {
+    display:block;
+    width:276px;
+}
+
+#nwm-wrap .nwm-btn {
+    width: 90px !important;
+}

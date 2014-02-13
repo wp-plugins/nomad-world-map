@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 3.8.1
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -105,9 +105,12 @@ You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vot
 
 == Changelog ==
 
+= 1.2.2 =
+* Fixed an issue with the widget options in WP 3.8 not working properly
+
 = 1.2.1 =
 * Fixed a bug where the location link would not always show correctly
-* Fixed a bug in the js script that would result breaking some themes
+* Fixed a bug in the js script that would result in breaking some themes
 
 = 1.2 =
 * Added a sidebar widget that can show your last location

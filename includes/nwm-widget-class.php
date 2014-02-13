@@ -31,14 +31,15 @@ class NWM_Widget extends WP_Widget {
                     $last_location = $this->find_last_location( $instance['map_id'] ); 
                     set_transient( 'nwm_widget_'.$instance['map_id'], $last_location, $last_location->transient_lifetime ); 
                 }
-
+                
                 if ( !empty( $last_location->lat ) ) {
                     $widget_params = array(
                         'latlng'       => $last_location->lat.','.$last_location->lng,
                         'location'     => $last_location->location,
-                        'country_code' => $last_location->country_code
+                        'country_code' => $last_location->iso2_country_code
                     ); 
                 } else {
+                     delete_transient( 'nwm_widget_'.$instance['map_id'] );
                     _e( '<p>There is a problem geocoding your location, please check your route on the selected map.</p>', 'nwm' );  
                 }                    
             } else {
@@ -117,18 +118,18 @@ class NWM_Widget extends WP_Widget {
         $nwm_route_order = get_option( 'nwm_route_order' );
 		$route_order = esc_sql( implode( ',', wp_parse_id_list( $nwm_route_order[$map_id] ) ) );
         $i = 0;
-        $last_location = '';
-        $transient_lifetime = '';
+        $last_location = new StdClass;
+        $transient_lifetime = 0;
         $remaining_time = '';
         
 		$nwm_location_data = $wpdb->get_results("
-												SELECT nwm_id, lat, lng, location, country_code, arrival
+												SELECT nwm_id, lat, lng, location, iso2_country_code, arrival
 												FROM $wpdb->nwm_routes
 												WHERE nwm_id IN ( $route_order )
 												ORDER BY field( nwm_id, $route_order )
 												"
 											    );	
-
+        
 		foreach ( $nwm_location_data as $k => $nwm_location ) {	
 		
 			/* If the date is in the future, then we need to change the line color on the map */		
@@ -169,8 +170,10 @@ class NWM_Widget extends WP_Widget {
             $transient_lifetime = $remaining_time;
         }
         
-        $last_location->transient_lifetime = $transient_lifetime;
-
+        if ( !empty( $nwm_location_data ) ) { 
+            $last_location->transient_lifetime = $transient_lifetime;
+        }
+        
         return $last_location;        
     }
 		
@@ -212,27 +215,34 @@ class NWM_Widget extends WP_Widget {
         if ( isset( $instance['latlng'] ) ) {
             $latlng = $instance['latlng'];
         }
-
+        
         $map_ids = get_option( 'nwm_map_ids' );
+        
+        $display_options = array(
+            "map_text_style" => __( 'Show it on the map and as text', 'nwm' ),
+            "text_style"     => __( 'Text only', 'nwm' ),
+            "map_style"      => __( 'Map only', 'nwm' )
+        );
+ 
+        $location_detection_options = array(
+            "manual_location" => __( 'I will fill it in manually', 'nwm' ),
+            "auto_location"   => __( 'Automatically, use my travel schedule', 'nwm' ),
+        );
         ?>
+
         <p>
             <label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label> 
             <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
         </p>
         <?php _e( 'How do you want to display your location in the sidebar?', 'nwm' ); ?>
         <p id="nwm-display-options" class="nwm-widget-labels">
-            <label for="<?php echo $this->get_field_id( 'display_type' ); ?>">
-                <input class="nwm-display-radiobox" id="<?php echo $this->get_field_id( 'display_type' ); ?>" name="<?php echo $this->get_field_name( 'display_type' ); ?>" type="radio" value="map_text_style" <?php checked( 'map_text_style', $display_type ); ?> />
-                <?php _e( 'Show it on the map and as text', 'nwm' ); ?>
-            </label>
-            <label for="<?php echo $this->get_field_id( 'display_type' ); ?>">
-                <input class="nwm-display-radiobox" id="<?php echo $this->get_field_id( 'display_type' ); ?>" name="<?php echo $this->get_field_name( 'display_type' ); ?>" type="radio" value="text_style" <?php checked( 'text_style', $display_type ); ?> />
-                <?php _e( 'Text only', 'nwm' ); ?>
-            </label>
-            <label for="<?php echo $this->get_field_id( 'display_type' ); ?>">
-                <input class="nwm-display-radiobox" id="<?php echo $this->get_field_id( 'display_type' ); ?>" name="<?php echo $this->get_field_name( 'display_type' ); ?>" type="radio" value="map_style" <?php checked( 'map_style', $display_type ); ?> />
-                <?php _e( 'Map only', 'nwm' ); ?>
-            </label>
+            <select autocomplete="off" name="<?php echo $this->get_field_name( 'display_type' ); ?>" id="<?php echo $this->get_field_id( 'display_type' ); ?>">
+                <?php
+                foreach (  $display_options as $display_key => $display_option ) {
+                    echo '<option value="' . esc_attr( $display_key ) . '"' . ( $display_type == esc_attr( $display_key ) ? 'selected="selected"' : '' ) . '>' . esc_html( $display_option ) . '</option>';
+                }
+                ?>
+            </select>
         </p>
         <p id="nwm-location-flag" <?php if ( $display_type == 'map_style' ) { echo 'style="display:none;"'; } ?>>
             <label for="<?php echo $this->get_field_id( 'flag' ); ?>">
@@ -242,14 +252,14 @@ class NWM_Widget extends WP_Widget {
         </p>        
         <?php _e( 'How do you want to determine your current location?', 'nwm' ); ?>
         <p id="nwm-location-detection" class="nwm-widget-labels">
-            <label for="<?php echo $this->get_field_id( 'location_detection' ); ?>">
-                <input class="nwm-manual-detection nwm-location-radiobox" id="<?php echo $this->get_field_id( 'location_detection' ); ?>" name="<?php echo $this->get_field_name( 'location_detection' ); ?>" type="radio" value="manual_location" <?php checked( 'manual_location', $location_detection ); ?> />
-                <?php _e( 'I will fill it in manually', 'nwm' ); ?>
-            </label>
-            <label for="<?php echo $this->get_field_id( 'location_detection' ); ?>">
-                <input class="nwm-auto-detection nwm-location-radiobox" id="<?php echo $this->get_field_id( 'location_detection' ); ?>" name="<?php echo $this->get_field_name( 'location_detection' ); ?>" type="radio" value="auto_location" <?php checked( 'auto_location', $location_detection ); ?> />
-                <?php _e( 'Automatically by using a travel schedule from a map', 'nwm' ); ?>
-            </label>
+            
+            <select autocomplete="off" name="<?php echo $this->get_field_name( 'location_detection' ); ?>" id="<?php echo $this->get_field_id( 'location_detection' ); ?>">
+                <?php
+                foreach ( $location_detection_options as $location_key => $location_option ) {
+                    echo '<option value="' . esc_attr( $location_key ) . '"' . ( $location_detection == esc_attr( $location_key ) ? 'selected="selected"' : '' ) . '>' . esc_html( $location_option ) . '</option>';
+                }
+                ?>
+            </select>  
         </p>                
         <p id="nwm-manually" <?php if ( $location_detection == 'auto_location' ) { echo 'style="display:none;"'; } ?>>
             <label for="<?php echo $this->get_field_id( 'manual_location' ); ?>"><?php _e( 'Your location:', 'nwm' ); ?></label> 
@@ -257,7 +267,7 @@ class NWM_Widget extends WP_Widget {
         </p>
         <p id="nwm-automatically" <?php if ( $location_detection == 'manual_location' ) { echo 'style="display:none;"'; } ?>>
             <label for="<?php echo $this->get_field_id( 'map_id' ); ?>"><?php _e( 'Select the map that should be used to determine your current location:', 'nwm' ); ?></label> 
-            <select name="<?php echo $this->get_field_name( 'map_id' ); ?>" id="<?php echo $this->get_field_id( 'map_id' ); ?>">
+            <select autocomplete="off" name="<?php echo $this->get_field_name( 'map_id' ); ?>" id="<?php echo $this->get_field_id( 'map_id' ); ?>">
                 <option value=""><?php _e( 'Select map', 'nwm' ); ?></option>
                 <?php 
                 foreach ( $map_ids as $map_id => $map_name ) {
@@ -266,9 +276,9 @@ class NWM_Widget extends WP_Widget {
                 ?>
             </select>
         </p>
-        <p id="nwm-zoom-level" <?php if ( $display_type != 'map_style' ) { echo 'style="display:none;"'; } ?>>
+        <p id="nwm-zoom-level" <?php if ( $display_type == 'text_style' ) { echo 'style="display:none;"'; } ?>>
             <label for="<?php echo $this->get_field_id( 'zoom_level' ); ?>"><?php _e( 'Zoom level for the map', 'nwm' ); ?></label> 
-            <select name="<?php echo $this->get_field_name( 'zoom_level' ); ?>" id="<?php echo $this->get_field_id( 'zoom_level' ); ?>">
+            <select autocomplete="off" name="<?php echo $this->get_field_name( 'zoom_level' ); ?>" id="<?php echo $this->get_field_id( 'zoom_level' ); ?>">
                 <?php 
                 for ( $i = 1; $i < 13; $i++ ) {
                     $selected = ( $zoom_level == $i ) ? 'selected="selected"' : '';
@@ -292,9 +302,9 @@ class NWM_Widget extends WP_Widget {
                 ?>
             </select>
         </p>
-        <p>
+        <p id="nwm-widget-description">
             <label for="<?php echo $this->get_field_id( 'map_description' ); ?>"><?php _e( 'Optional text under your location:', 'nwm' ); ?></label> 
-            <textarea rows="5" cols="34" placeholder="<?php _e( 'Here you can add more text or link back to a map page.', 'nwm' ) ?>" name="<?php echo $this->get_field_name( 'map_description' ); ?>" id="<?php echo $this->get_field_id( 'map_description' ); ?>"><?php echo esc_textarea( $map_description ); ?></textarea>
+            <textarea rows="5" placeholder="<?php _e( 'Here you can add more text or link back to a map page.', 'nwm' ) ?>" name="<?php echo $this->get_field_name( 'map_description' ); ?>" id="<?php echo $this->get_field_id( 'map_description' ); ?>"><?php echo esc_textarea( $map_description ); ?></textarea>
             <em><?php _e( 'Link and strong tags are allowed.', 'nwm' ) ?></em>
         </p>
         <?php 

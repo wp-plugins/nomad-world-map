@@ -458,12 +458,17 @@
     margin-bottom: 5px;
 }
 
+#nwm-widget-description textarea {
+    display: block;
+    width: 225px;
+}
+
 @media screen and (max-width: 840px) {
-	.gmap-wrap {margin-left:277px;}
-	.textinput {width:167px;}
-	#nwm-destination-wrap {width:255px;}	
-	.nwm-active, #nwm-destination-wrap textarea {width:233px;}
-	#nwm-search-link span a {display:block;}
-	#gmap-nwm {height:316px;}
-	#nwm-settings-form .postbox-container.side {width:auto;}
+    .gmap-wrap {margin-left:277px;}
+    .textinput {width:167px;}
+    #nwm-destination-wrap {width:255px;}	
+    .nwm-active, #nwm-destination-wrap textarea {width:233px;}
+    #nwm-search-link span a {display:block;}
+    #gmap-nwm {height:316px;}
+    #nwm-settings-form .postbox-container.side {width:auto;}
 }

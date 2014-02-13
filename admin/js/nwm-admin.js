@@ -1616,9 +1616,12 @@ $( "#nwm-reset-thumb" ).on( "click", function() {
 });
 
 /* Widgets -> Toggle the input fields for manual / auto location detection */
-$( document ).on( "change", ".nwm-display-radiobox", function() {
+//$( document ).on( "change", ".nwm-display-radiobox", function() {
+$( document ).on( "change", "#nwm-display-options select", function() {
 	var radioValue = $(this).val(),
 		$parent = $(this).parents( "form" ); // For some reason, accessing the id directly fails. It only works if we first select the form parent?
+
+		console.log( radioValue );
 
 	if ( radioValue == "text_style" ) {
 		$parent.find( "#nwm-zoom-level" ).hide();
@@ -1634,7 +1637,7 @@ $( document ).on( "change", ".nwm-display-radiobox", function() {
 });
 
 /* Widgets -> Toggle the display map option, only show it if we show the location as text */
-$( document ).on( "change", ".nwm-location-radiobox", function() {
+$( document ).on( "change", "#nwm-location-detection select", function() {
 	var radioValue = $(this).val(),
 		$parent = $(this).parents( "form" ); // For some reason, accessing the id directly fails. It only works if we first select the form parent?
 
