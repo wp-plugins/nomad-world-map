@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 3.8.1
-Stable tag: 1.2.2
+Stable tag: 1.2.21
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,6 +104,11 @@ You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vot
 
 
 == Changelog ==
+
+= 1.2.21 =
+* Fixed an issue where on some servers the map would remain empty
+* Fixed the flags in the route editor not being saved properly
+* Fixed the map cache not being flushed after updating from 1.1.4 to 1.2.x.
 
 = 1.2.2 =
 * Fixed an issue with the widget options in WP 3.8 not working properly

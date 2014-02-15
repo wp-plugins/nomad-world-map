@@ -49,7 +49,7 @@ function nwm_show_map( $atts, $content = null ) {
 	} else {
         $map_settings['contentLocation'] = $settings['content_location'];
     }
-					
+    
 	/* Check if there is an existing transient we can use */
 	if ( false === ( $map_data = get_transient( 'nwm_locations_'.$id ) ) ) {	
 		$nwm_route_order = get_option( 'nwm_route_order' );
@@ -61,11 +61,11 @@ function nwm_show_map( $atts, $content = null ) {
 		$nwm_location_data = $wpdb->get_results("
 												SELECT nwm_id, post_id, thumb_id, lat, lng, location, arrival, departure
 												FROM $wpdb->nwm_routes
-												WHERE nwm_id IN ($route_order)
-												ORDER BY field (nwm_id, $route_order)
+												WHERE nwm_id IN ( $route_order )
+												ORDER BY field( nwm_id, $route_order )
 												"
 											    );	
-																				
+        
 		foreach ( $nwm_location_data as $k => $nwm_location ) {	
 			$future = '';
 		
@@ -273,12 +273,10 @@ function nwm_show_list( $atts, $content = null ) {
 		$nwm_location_data = $wpdb->get_results("
 												SELECT nwm_id, post_id, location, arrival, departure
 												FROM $wpdb->nwm_routes
-												WHERE nwm_id IN ($route_order)
-												ORDER BY field (nwm_id, $route_order) $order
+												WHERE nwm_id IN ( $route_order )
+												ORDER BY field ( nwm_id, $route_order ) $order
 												"
 											    );	
-
-        echo $wpdb->last_query;
         
 		foreach ( $nwm_location_data as $k => $nwm_location ) {	
 			$future = '';

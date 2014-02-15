@@ -176,6 +176,10 @@ function nwm_version_updates() {
         nwm_check_country_codes();
         
     }
+    
+    if ( version_compare( $current_version, '1.2.21', '<' ) ) {
+       nwm_delete_all_transients(); 
+    }
 	
 	update_option( 'nwm_version', NWN_VERSION_NUM );
 }

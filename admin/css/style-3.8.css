@@ -18,7 +18,7 @@
 
 #gmap-nwm {
     border-radius:0 !important;
-    height:589px !important;
+    height:576px !important;
 }
 
 #nwm-destination-wrap .nwm-active {
@@ -27,7 +27,7 @@
 
 #nwm-widget-description textarea {
     display:block;
-    width:276px;
+    width:276px !important;
 }
 
 #nwm-wrap .nwm-btn {

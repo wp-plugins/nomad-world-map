@@ -48,11 +48,8 @@ function nwm_filter_country_code( $response ) {
 function nwm_check_country_codes() {
     
     global $wpdb;
-    
-    //todo weghalen test
-   // $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->nwm_routes SET country_code = %s", '' ) );	
 
-    $nwm_location_data = $wpdb->get_results( "SELECT nwm_id, location, country_code FROM $wpdb->nwm_routes WHERE country_code = ''" );	
+    $nwm_location_data = $wpdb->get_results( "SELECT nwm_id, location, iso2_country_code FROM $wpdb->nwm_routes WHERE country_code = ''" );	
 
     if ( !empty( $nwm_location_data ) ) {
        $empty_responses = nwm_request_location_data ( $nwm_location_data ); 
@@ -85,7 +82,7 @@ function nwm_request_location_data ( $nwm_location_data ) {
     
     /* Try to retrieve all the country codes from the Google Maps API */
     foreach ( $nwm_location_data as $k => $nwm_location ) {	
-        if ( empty( $nwm_location->country_code ) ) {
+        if ( empty( $nwm_location->iso2_country_code ) ) {
              $country_codes[$nwm_location->nwm_id] = nwm_geocode_location( $nwm_location->location );
         } 
 
@@ -113,6 +110,6 @@ function nwm_update_country_code( $country_code, $nwm_id ) {
     
     global $wpdb;	
     
-    $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->nwm_routes SET country_code = %s WHERE nwm_id = %d", $country_code, $nwm_id ) );	
+    $wpdb->query( $wpdb->prepare( "UPDATE $wpdb->nwm_routes SET iso2_country_code = %s WHERE nwm_id = %d", $country_code, $nwm_id ) );	
     
 }

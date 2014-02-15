@@ -747,7 +747,7 @@ function nwm_map_editor_data( $nwm_map_id ) {
             'url'                => $url,
             'thumb_url'          => $thumb_url[0],
             'location'           => $route_stop->location,
-            'country_code'       => $route_stop->country_code,
+            'country_code'       => $route_stop->iso2_country_code,
             'arrival'            => $route_stop->arrival,
             'arrival_formated'   => nwm_date_format( $route_stop->arrival ),
             'departure'          => $route_stop->departure,

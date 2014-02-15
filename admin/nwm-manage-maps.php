@@ -182,7 +182,7 @@ function nwm_process_map_changes( $nwm_map_ids, $nwm_route_order ) {
 				$used_nwm_ids = esc_sql( implode( ',', wp_parse_id_list( $used_nwm_ids ) ) );
 				
 				/* Delete the route entries from the db */						
-				$result = $wpdb->query( "DELETE FROM $wpdb->nwm_routes WHERE nwm_id IN ($used_nwm_ids)" );
+				$result = $wpdb->query( "DELETE FROM $wpdb->nwm_routes WHERE nwm_id IN ( $used_nwm_ids )" );
 				
 				if ( $result !== false ) {
 					update_option( 'nwm_route_order', $nwm_route_order );
