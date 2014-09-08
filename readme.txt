@@ -3,8 +3,8 @@ Contributors: tijmensmit
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=NFZ6NCFKXQ8EA
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
-Tested up to: 3.9.1
-Stable tag: 1.2.30
+Tested up to: 4.0
+Stable tag: 1.2.31
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -106,6 +106,14 @@ You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vot
 
 
 == Changelog ==
+
+= 1.2.31 =
+* Fixed the post id not being saved when the location content was set to "post excerpt" ( if you have tried to link blog post to locations but the excerpt was missing. Then you need to edit the location under "Route Editor -> Edit location" and search for the blog post again and then update the location )
+* Fixed sometimes not being able to add new routes after creating a new map
+* Fixed several php notices breaking the route editor when WP_DEBUG was enabled
+* Fixed the linked url not showing up correctly in the location list in the route editor
+* Restricted the width of the location position dropdown 
+* Added Swedish (sv_SE) translations, via [Elger](http://20x.se/)
 
 = 1.2.30 =
 * Fixed the location thumbnails breaking when the images are loaded from another domain
