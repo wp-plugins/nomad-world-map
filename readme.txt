@@ -1,7 +1,6 @@
 === Nomad World Map ===
 Contributors: tijmensmit
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=NFZ6NCFKXQ8EA
-Tags: google maps, route, travel, travel blog, trip, geocoding
+Tags: adopt-me, google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 4.0
 Stable tag: 1.2.31
@@ -11,6 +10,10 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Create your own custom travel map. Link locations on the map to blog posts and share your travel plans.
 
 == Description ==
+
+<strong>Unfortunately I no longer have time to actively maintain this plugin.</strong> 
+
+If anyone is interested in taking over the development then please contact me at info [at] tijmensmit.com
 
 For each location that is added to the map you can set the type of content you want to show. Either the excerpt of a blog post, a short custom description or only the travel dates.
 
@@ -31,9 +34,6 @@ The location content itself is shown in a carousel underneath the map. When you 
 
 [Demo](http://nomadworldmap.com/)
 
-You can suggest new features [here](http://nomadworldmap.uservoice.com/), or vote for existing suggestions from others.
-
-If you want to contribute to the development of this plugin, you can do so through [GitHub](https://github.com/Tijmen/Nomad-World-Map). 
 
 == Installation ==
 
