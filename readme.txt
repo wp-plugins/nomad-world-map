@@ -1,5 +1,5 @@
 === Nomad World Map ===
-Contributors: tijmensmit, paoltaia, tiofansisland
+Contributors: tijmensmit, paoltaia, stiofansisland
 Tags: google maps, route, travel, travel blog, trip, geocoding
 Requires at least: 3.5
 Tested up to: 4.0
